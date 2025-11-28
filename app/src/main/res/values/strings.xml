@@ -1,0 +1,7 @@
+<resources>
+    <string name="update_dummy">Обновить (заглушка)</string>
+    <string name="btn_text">Курсы валют</string>
+    <string name="btn_text_about">О приложении</string>
+    <string name="name_logo">Курс Менеджер</string>
+    <string name="update_info">Данные обнавлены</string>
+</resources>
