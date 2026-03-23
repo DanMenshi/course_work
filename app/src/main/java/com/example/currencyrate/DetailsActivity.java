@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import com.github.mikephil.charting.charts.LineChart;
@@ -16,57 +17,41 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class DetailsActivity extends AppCompatActivity {
+
+    private LineChart chart;
+    private TextView tvCurrencyCode, tvCurrentRate, tvTrend;
+    private final Random random = new Random();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        chart = findViewById(R.id.chart);
+        tvCurrencyCode = findViewById(R.id.tvCurrencyCode);
+        tvCurrentRate = findViewById(R.id.tvCurrentRate);
+        tvTrend = findViewById(R.id.tvTrend);
+
+        String code = getIntent().getStringExtra("CURRENCY_CODE");
+        String rate = getIntent().getStringExtra("CURRENCY_RATE");
+
+        if (code != null) tvCurrencyCode.setText(code);
+        if (rate != null) tvCurrentRate.setText(rate + " ₽");
+
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         setupChart();
+        updateRandomData();
         setupButtonAnimations();
     }
 
     private void setupChart() {
-        LineChart chart = findViewById(R.id.chart);
-        
-        List<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(0, 92.21f));
-        entries.add(new Entry(1, 93.80f));
-        entries.add(new Entry(2, 91.50f));
-        entries.add(new Entry(3, 92.10f));
-        entries.add(new Entry(4, 93.40f));
-        entries.add(new Entry(5, 91.00f));
-        entries.add(new Entry(6, 91.10f));
-
-        LineDataSet dataSet = new LineDataSet(entries, "USD Rate");
-        
-        // Современный стиль линии
-        dataSet.setColor(Color.parseColor("#1E88E5"));
-        dataSet.setLineWidth(3f);
-        dataSet.setDrawCircles(false);
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER); // Плавная линия как на макете
-        
-        // Градиентная заливка под графиком
-        dataSet.setDrawFilled(true);
-        Drawable drawable = ContextCompat.getDrawable(this, R.drawable.chart_gradient);
-        dataSet.setFillDrawable(drawable);
-        
-        dataSet.setDrawValues(false);
-        dataSet.setHighlightEnabled(true);
-        dataSet.setHighLightColor(Color.WHITE);
-
-        LineData lineData = new LineData(dataSet);
-        chart.setData(lineData);
-        
-        // Настройка осей для чистого вида
         chart.getAxisLeft().setTextColor(Color.parseColor("#757575"));
         chart.getAxisLeft().setGridColor(Color.parseColor("#22FFFFFF"));
         chart.getAxisLeft().setDrawAxisLine(false);
-        
         chart.getAxisRight().setEnabled(false);
         
         XAxis xAxis = chart.getXAxis();
@@ -84,29 +69,55 @@ public class DetailsActivity extends AppCompatActivity {
 
         chart.getLegend().setEnabled(false);
         chart.getDescription().setEnabled(false);
-        chart.setExtraOffsets(10, 10, 10, 10);
-        
-        // Анимация при открытии
-        chart.animateX(1200);
+    }
+
+    private void updateRandomData() {
+        List<Entry> entries = new ArrayList<>();
+        float baseRate = 90f + random.nextFloat() * 10f;
+        for (int i = 0; i < 7; i++) {
+            float val = baseRate + (random.nextFloat() * 4f - 2f);
+            entries.add(new Entry(i, val));
+        }
+
+        LineDataSet dataSet = new LineDataSet(entries, "Rate");
+        dataSet.setColor(Color.parseColor("#1E88E5"));
+        dataSet.setLineWidth(3f);
+        dataSet.setDrawCircles(false);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        dataSet.setDrawFilled(true);
+        Drawable drawable = ContextCompat.getDrawable(this, R.drawable.chart_gradient);
+        dataSet.setFillDrawable(drawable);
+        dataSet.setDrawValues(false);
+
+        LineData lineData = new LineData(dataSet);
+        chart.setData(lineData);
+        chart.animateX(1000);
+
+        // Random trend
+        boolean up = random.nextBoolean();
+        float percent = 0.1f + random.nextFloat() * 1.5f;
+        tvTrend.setText((up ? "↗ +" : "↘ -") + String.format("%.2f%%", percent));
+        tvTrend.setTextColor(up ? Color.parseColor("#00C853") : Color.parseColor("#FF1744"));
     }
 
     private void setupButtonAnimations() {
-        View refreshBtn = findViewById(R.id.btnRefresh);
-        refreshBtn.setOnClickListener(v -> {
-            // Анимация вращения и пульсации
+        findViewById(R.id.btnRefresh).setOnClickListener(v -> {
             v.animate().rotationBy(360).scaleX(0.8f).scaleY(0.8f).setDuration(300).withEndAction(() -> {
                 v.animate().scaleX(1f).scaleY(1f).setDuration(200).start();
+                updateRandomData();
             }).start();
         });
-        
-        // Пример анимации для табов
+
         View tabs = findViewById(R.id.llTabs);
-        for (int i = 0; i < ((android.view.ViewGroup)tabs).getChildCount(); i++) {
-            View tab = ((android.view.ViewGroup)tabs).getChildAt(i);
-            tab.setOnClickListener(v -> {
-                animateClick(v);
-                // Логика переключения периода
-            });
+        if (tabs instanceof android.view.ViewGroup) {
+            android.view.ViewGroup vg = (android.view.ViewGroup) tabs;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                View tab = vg.getChildAt(i);
+                tab.setOnClickListener(v -> {
+                    animateClick(v);
+                    updateRandomData();
+                });
+            }
         }
     }
 
