@@ -62,10 +62,13 @@
                 android:gravity="center"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
+                android:clickable="true"
+                android:focusable="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
+                    android:id="@+id/tvCodeGive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="us USD"
@@ -95,6 +98,7 @@
                 app:layout_constraintTop_toBottomOf="@id/labelGive" />
 
             <TextView
+                android:id="@+id/tvNameGive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Доллар США"
@@ -114,6 +118,8 @@
         android:elevation="4dp"
         android:padding="16dp"
         android:src="@android:drawable/stat_notify_sync"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="@id/cvGive"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -153,10 +159,13 @@
                 android:gravity="center"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
+                android:clickable="true"
+                android:focusable="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
+                    android:id="@+id/tvCodeReceive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ru RUB"
@@ -184,6 +193,7 @@
                 app:layout_constraintTop_toBottomOf="@id/labelReceive" />
 
             <TextView
+                android:id="@+id/tvNameReceive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Российский рубль"
@@ -234,6 +244,7 @@
         app:layout_constraintTop_toBottomOf="@id/cvExchangeRate">
 
         <Button
+            android:id="@+id/btn100"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -243,6 +254,7 @@
             android:textColor="@color/text_main"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
         <Button
+            android:id="@+id/btn500"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -252,6 +264,7 @@
             android:textColor="@color/text_main"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
         <Button
+            android:id="@+id/btn1000"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -261,6 +274,7 @@
             android:textColor="@color/text_main"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
         <Button
+            android:id="@+id/btn5000"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

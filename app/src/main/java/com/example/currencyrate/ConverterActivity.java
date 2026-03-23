@@ -11,26 +11,40 @@ import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import java.util.Random;
 
 public class ConverterActivity extends AppCompatActivity {
 
     private EditText etAmountGive;
     private TextView tvAmountReceive, tvExchangeRateText;
+    private TextView tvCodeGive, tvNameGive, tvCodeReceive, tvNameReceive;
+    private LinearLayout spinnerGive, spinnerReceive;
     private ImageView btnSwap, btnBack;
-    private double currentRate = 92.9343;
-    private final Random random = new Random();
+    
+    private Currency currencyGive;
+    private Currency currencyReceive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_converter);
 
+        // Initialize currencies
+        currencyGive = CurrencyData.getByCode("USD");
+        currencyReceive = CurrencyData.getByCode("RUB");
+
+        // Bind views
         etAmountGive = findViewById(R.id.etAmountGive);
         tvAmountReceive = findViewById(R.id.tvAmountReceive);
         tvExchangeRateText = findViewById(R.id.tvExchangeRateText);
+        
+        tvCodeGive = ((ViewGroup)findViewById(R.id.spinnerGive)).getChildAt(0) instanceof TextView ? (TextView)((ViewGroup)findViewById(R.id.spinnerGive)).getChildAt(0) : null;
+        tvCodeReceive = ((ViewGroup)findViewById(R.id.spinnerReceive)).getChildAt(0) instanceof TextView ? (TextView)((ViewGroup)findViewById(R.id.spinnerReceive)).getChildAt(0) : null;
+        
+        // Better way to find those text views
+        findInternalViews();
 
         btnSwap = findViewById(R.id.btnSwap);
         btnBack = findViewById(R.id.btnBack);
@@ -38,17 +52,11 @@ public class ConverterActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         btnSwap.setOnClickListener(v -> {
+            swapCurrencies();
             RotateAnimation rotate = new RotateAnimation(0, 180, 
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
             rotate.setDuration(300);
             v.startAnimation(rotate);
-            
-            // Randomly change the rate when swapping
-            currentRate = 1.0 / currentRate;
-            if (currentRate < 0.1) currentRate = 60.0 + random.nextDouble() * 40.0;
-            
-            updateExchangeRateDisplay();
-            calculateConversion();
         });
 
         etAmountGive.addTextChangedListener(new TextWatcher() {
@@ -62,11 +70,71 @@ public class ConverterActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        // Set up listeners for the amount buttons (100, 500, etc.)
         setupQuickAmountButtons();
+        updateUI();
         
-        updateExchangeRateDisplay();
+        // Fetch fresh rates from CBR
+        CurrencyData.fetchRates(this::updateUI);
+    }
+
+    private void findInternalViews() {
+        // Find labels inside the CardViews
+        ViewGroup cvGiveLayout = (ViewGroup) ((ViewGroup) findViewById(R.id.cvGive)).getChildAt(0);
+        for(int i=0; i<cvGiveLayout.getChildCount(); i++) {
+            View child = cvGiveLayout.getChildAt(i);
+            if(child instanceof TextView && !(child instanceof EditText) && i == cvGiveLayout.getChildCount()-1) {
+                tvNameGive = (TextView) child;
+            }
+        }
+
+        ViewGroup cvReceiveLayout = (ViewGroup) ((ViewGroup) findViewById(R.id.cvReceive)).getChildAt(0);
+        for(int i=0; i<cvReceiveLayout.getChildCount(); i++) {
+            View child = cvReceiveLayout.getChildAt(i);
+            if(child instanceof TextView && i == cvReceiveLayout.getChildCount()-1) {
+                tvNameReceive = (TextView) child;
+            }
+        }
+        
+        spinnerGive = findViewById(R.id.spinnerGive);
+        spinnerReceive = findViewById(R.id.spinnerReceive);
+        
+        tvCodeGive = (TextView) spinnerGive.getChildAt(0);
+        tvCodeReceive = (TextView) spinnerReceive.getChildAt(0);
+    }
+
+    private void swapCurrencies() {
+        Currency temp = currencyGive;
+        currencyGive = currencyReceive;
+        currencyReceive = temp;
+        updateUI();
+    }
+
+    private void updateUI() {
+        if (tvCodeGive != null) tvCodeGive.setText(currencyGive.getSymbol() + " " + currencyGive.getCode());
+        if (tvNameGive != null) tvNameGive.setText(currencyGive.getName());
+        if (tvCodeReceive != null) tvCodeReceive.setText(currencyReceive.getSymbol() + " " + currencyReceive.getCode());
+        if (tvNameReceive != null) tvNameReceive.setText(currencyReceive.getName());
+
+        double rate = currencyGive.getRate() / currencyReceive.getRate();
+        tvExchangeRateText.setText(String.format("1 %s = %.4f %s", currencyGive.getCode(), rate, currencyReceive.getCode()));
+        
         calculateConversion();
+    }
+
+    private void calculateConversion() {
+        String input = etAmountGive.getText().toString();
+        if (input.isEmpty()) {
+            tvAmountReceive.setText("0.00");
+            return;
+        }
+        try {
+            double amountGive = Double.parseDouble(input);
+            double rate = currencyGive.getRate() / currencyReceive.getRate();
+            double result = amountGive * rate;
+            tvAmountReceive.setText(String.format("%.2f", result));
+        } catch (NumberFormatException e) {
+            tvAmountReceive.setText("0.00");
+        }
     }
 
     private void setupQuickAmountButtons() {
@@ -86,27 +154,6 @@ public class ConverterActivity extends AppCompatActivity {
             for (int i = 0; i < vg.getChildCount(); i++) {
                 findAllButtons(vg.getChildAt(i));
             }
-        }
-    }
-
-    private void updateExchangeRateDisplay() {
-        tvExchangeRateText.setText(String.format("1 USD = %.4f RUB", currentRate));
-    }
-
-    private void calculateConversion() {
-        String input = etAmountGive.getText().toString();
-        if (input.isEmpty()) {
-            tvAmountReceive.setText("0.00");
-            return;
-        }
-        try {
-            double amountGive = Double.parseDouble(input);
-            double result = amountGive * currentRate;
-            tvAmountReceive.setText(String.format("%.2f", result));
-            tvAmountReceive.setAlpha(0.5f);
-            tvAmountReceive.animate().alpha(1f).setDuration(200).start();
-        } catch (NumberFormatException e) {
-            tvAmountReceive.setText("0.00");
         }
     }
 

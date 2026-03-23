@@ -9,6 +9,7 @@ import android.view.animation.ScaleAnimation;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,41 +24,52 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, ConverterActivity.class));
         });
 
-        ViewGroup gridLayout = findViewById(R.id.glCurrencies);
-        for (int i = 0; i < gridLayout.getChildCount(); i++) {
-            View card = gridLayout.getChildAt(i);
-            card.setOnClickListener(v -> {
-                animateClick(v);
-                
-                // Извлекаем данные из карточки для передачи в детали
-                String code = "USD";
-                String rate = "0.00";
-                
-                if (v instanceof ViewGroup) {
-                    ViewGroup vg = (ViewGroup) v;
-                    // В нашем layout структура: FrameLayout -> LinearLayout -> TextViews
-                    // Мы можем найти TextView с кодом валюты
-                    for (int j = 0; j < vg.getChildCount(); j++) {
-                        View child = vg.getChildAt(j);
-                        if (child instanceof ViewGroup) {
-                            ViewGroup innerVg = (ViewGroup) child;
-                            for (int k = 0; k < innerVg.getChildCount(); k++) {
-                                View text = innerVg.getChildAt(k);
-                                if (text instanceof TextView) {
-                                    String content = ((TextView) text).getText().toString();
-                                    if (content.contains("/")) code = content.split("/")[0];
-                                    if (Character.isDigit(content.charAt(0))) rate = content;
-                                }
-                            }
-                        }
-                    }
-                }
+        findViewById(R.id.ivRefresh).setOnClickListener(v -> {
+            v.animate().rotationBy(360).setDuration(500).start();
+            CurrencyData.fetchRates(this::updateGridData);
+        });
 
-                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-                intent.putExtra("CURRENCY_CODE", code);
-                intent.putExtra("CURRENCY_RATE", rate);
-                startActivity(intent);
-            });
+        // Initial fetch
+        CurrencyData.fetchRates(this::updateGridData);
+        updateGridData();
+    }
+
+    private void updateGridData() {
+        ViewGroup gridLayout = findViewById(R.id.glCurrencies);
+        List<Currency> currencies = CurrencyData.getCurrencies();
+
+        // Map static views to data (for simplicity in this layout)
+        updateCard(gridLayout.getChildAt(0), "USD");
+        updateCard(gridLayout.getChildAt(1), "EUR");
+        updateCard(gridLayout.getChildAt(2), "CNY");
+        updateCard(gridLayout.getChildAt(3), "KZT");
+    }
+
+    private void updateCard(View card, String code) {
+        if (card == null) return;
+        Currency c = CurrencyData.getByCode(code);
+        
+        card.setOnClickListener(v -> {
+            animateClick(v);
+            Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+            intent.putExtra("CURRENCY_CODE", c.getCode());
+            intent.putExtra("CURRENCY_RATE", String.format("%.2f", c.getRate()));
+            startActivity(intent);
+        });
+
+        if (card instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) card;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                View child = vg.getChildAt(i);
+                if (child instanceof ViewGroup) {
+                    ViewGroup labels = (ViewGroup) child;
+                    TextView tvPair = (TextView) labels.getChildAt(0);
+                    TextView tvValue = (TextView) labels.getChildAt(1);
+                    
+                    tvPair.setText("1 " + c.getCode() + " / RUB");
+                    tvValue.setText(String.format("%.2f", c.getRate()));
+                }
+            }
         }
     }
 

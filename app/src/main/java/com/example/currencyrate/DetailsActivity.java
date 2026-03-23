@@ -17,12 +17,13 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class DetailsActivity extends AppCompatActivity {
 
     private LineChart chart;
-    private TextView tvCurrencyCode, tvCurrentRate, tvTrend;
+    private TextView tvCurrencyCode, tvCurrencyName, tvCurrentRate, tvTrend, tvUnit;
     private final Random random = new Random();
 
     @Override
@@ -32,19 +33,25 @@ public class DetailsActivity extends AppCompatActivity {
 
         chart = findViewById(R.id.chart);
         tvCurrencyCode = findViewById(R.id.tvCurrencyCode);
+        tvCurrencyName = findViewById(R.id.tvCurrencyName);
         tvCurrentRate = findViewById(R.id.tvCurrentRate);
         tvTrend = findViewById(R.id.tvTrend);
+        tvUnit = findViewById(R.id.tvUnit);
 
         String code = getIntent().getStringExtra("CURRENCY_CODE");
-        String rate = getIntent().getStringExtra("CURRENCY_RATE");
+        if (code == null) code = "USD";
+        
+        Currency currency = CurrencyData.getByCode(code);
 
-        if (code != null) tvCurrencyCode.setText(code);
-        if (rate != null) tvCurrentRate.setText(rate + " ₽");
+        tvCurrencyCode.setText(currency.getCode());
+        tvCurrencyName.setText(currency.getName());
+        tvCurrentRate.setText(String.format(Locale.getDefault(), "%.2f %s", currency.getRate(), "₽"));
+        tvUnit.setText(String.format(Locale.getDefault(), "за 1 %s", currency.getCode()));
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         setupChart();
-        updateRandomData();
+        updateRandomData(currency.getRate());
         setupButtonAnimations();
     }
 
@@ -71,11 +78,11 @@ public class DetailsActivity extends AppCompatActivity {
         chart.getDescription().setEnabled(false);
     }
 
-    private void updateRandomData() {
+    private void updateRandomData(double currentRate) {
         List<Entry> entries = new ArrayList<>();
-        float baseRate = 90f + random.nextFloat() * 10f;
+        float baseRate = (float) currentRate;
         for (int i = 0; i < 7; i++) {
-            float val = baseRate + (random.nextFloat() * 4f - 2f);
+            float val = baseRate + (random.nextFloat() * (baseRate * 0.04f) - (baseRate * 0.02f));
             entries.add(new Entry(i, val));
         }
 
@@ -96,7 +103,7 @@ public class DetailsActivity extends AppCompatActivity {
         // Random trend
         boolean up = random.nextBoolean();
         float percent = 0.1f + random.nextFloat() * 1.5f;
-        tvTrend.setText((up ? "↗ +" : "↘ -") + String.format("%.2f%%", percent));
+        tvTrend.setText(String.format(Locale.getDefault(), "%s %.2f%%", (up ? "↗ +" : "↘ -"), percent));
         tvTrend.setTextColor(up ? Color.parseColor("#00C853") : Color.parseColor("#FF1744"));
     }
 
@@ -104,7 +111,8 @@ public class DetailsActivity extends AppCompatActivity {
         findViewById(R.id.btnRefresh).setOnClickListener(v -> {
             v.animate().rotationBy(360).scaleX(0.8f).scaleY(0.8f).setDuration(300).withEndAction(() -> {
                 v.animate().scaleX(1f).scaleY(1f).setDuration(200).start();
-                updateRandomData();
+                Currency c = CurrencyData.getByCode(tvCurrencyCode.getText().toString());
+                updateRandomData(c.getRate());
             }).start();
         });
 
@@ -115,7 +123,8 @@ public class DetailsActivity extends AppCompatActivity {
                 View tab = vg.getChildAt(i);
                 tab.setOnClickListener(v -> {
                     animateClick(v);
-                    updateRandomData();
+                    Currency c = CurrencyData.getByCode(tvCurrencyCode.getText().toString());
+                    updateRandomData(c.getRate());
                 });
             }
         }
