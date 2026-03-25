@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 
 public class CurrencyData {
     private static final String CBR_URL = "https://www.cbr.ru/scripts/XML_daily.asp";
-    private static List<Currency> currencies = Collections.synchronizedList(new ArrayList<>());
+    private static final List<Currency> currencies = Collections.synchronizedList(new ArrayList<>());
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
