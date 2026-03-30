@@ -16,7 +16,6 @@ class CurrencySelectorSheet : BottomSheetDialogFragment() {
     private var _binding: LayoutBottomSheetAddBinding? = null
     private val binding get() = _binding!!
 
-    // Используем ту же ViewModel, что и в ConverterActivity, без повторной инициализации
     private val viewModel: ConverterViewModel by activityViewModels()
 
     private var selectionType: SelectionType = SelectionType.GIVE
@@ -24,11 +23,20 @@ class CurrencySelectorSheet : BottomSheetDialogFragment() {
     enum class SelectionType { GIVE, RECEIVE }
 
     companion object {
+        private const val ARG_SELECTION_TYPE = "selection_type"
+
         fun newInstance(type: SelectionType): CurrencySelectorSheet {
             val fragment = CurrencySelectorSheet()
-            fragment.selectionType = type
+            val args = Bundle()
+            args.putSerializable(ARG_SELECTION_TYPE, type)
+            fragment.arguments = args
             return fragment
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        selectionType = arguments?.getSerializable(ARG_SELECTION_TYPE) as? SelectionType ?: SelectionType.GIVE
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -40,12 +48,12 @@ class CurrencySelectorSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val adapter = CurrencyAdapter(
-            onFavoriteClick = { _, _ -> /* В селекторе не меняем избранное */ },
+            onFavoriteClick = { _, _ -> },
             onItemClick = { currency ->
                 if (selectionType == SelectionType.GIVE) {
-                    viewModel.selectGiveCurrency(currency)
+                    viewModel.updateGiveCurrency(currency)
                 } else {
-                    viewModel.selectReceiveCurrency(currency)
+                    viewModel.updateReceiveCurrency(currency)
                 }
                 dismiss()
             }
@@ -57,7 +65,6 @@ class CurrencySelectorSheet : BottomSheetDialogFragment() {
         }
 
         viewModel.allCurrencies.observe(viewLifecycleOwner) { currencies ->
-            // Добавляем рубль в список для выбора, если его там нет
             val list = currencies.toMutableList()
             if (list.none { it.code == "RUB" }) {
                 list.add(0, CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1))

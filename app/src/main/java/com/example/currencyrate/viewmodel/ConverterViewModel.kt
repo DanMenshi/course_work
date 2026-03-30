@@ -26,29 +26,25 @@ class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel
 
     private var currentInput: Double = 0.0
 
-    /**
-     * Инициализация валют по умолчанию (USD -> RUB)
-     */
+    fun updateGiveCurrency(entity: CurrencyEntity) {
+        _currencyGive.value = entity
+        calculate()
+    }
+
+    fun updateReceiveCurrency(entity: CurrencyEntity) {
+        _currencyReceive.value = entity
+        calculate()
+    }
+
     fun setInitialCurrencies(currencies: List<CurrencyEntity>) {
         if (_currencyGive.value != null && _currencyReceive.value != null) return
         
         val usd = currencies.find { it.code == "USD" }
-        // Если RUB нет в списке (обычно CBR присылает только иностранные валюты), создаем объект вручную
         val rub = currencies.find { it.code == "RUB" } ?: CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1)
 
         if (_currencyGive.value == null) _currencyGive.value = usd ?: currencies.firstOrNull()
         if (_currencyReceive.value == null) _currencyReceive.value = rub
         
-        calculate()
-    }
-
-    fun selectGiveCurrency(currency: CurrencyEntity) {
-        _currencyGive.value = currency
-        calculate()
-    }
-
-    fun selectReceiveCurrency(currency: CurrencyEntity) {
-        _currencyReceive.value = currency
         calculate()
     }
 
@@ -61,7 +57,6 @@ class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel
         val give = _currencyGive.value ?: return
         val receive = _currencyReceive.value ?: return
 
-        // Вычисляем курс за 1 единицу
         val rateGive = give.rate / give.nominal
         val rateReceive = receive.rate / receive.nominal
 

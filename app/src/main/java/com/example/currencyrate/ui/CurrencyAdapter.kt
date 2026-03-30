@@ -2,10 +2,12 @@ package com.example.currencyrate.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import com.example.currencyrate.R
 import com.example.currencyrate.data.local.CurrencyEntity
 import com.example.currencyrate.databinding.ItemCurrencyCompactBinding
 import com.example.currencyrate.databinding.ItemCurrencyGlassBinding
@@ -57,15 +59,24 @@ class CurrencyAdapter(
             tvName.text = item.name
             tvValue.text = String.format(Locale.getDefault(), "%.2f", item.rate)
 
-            val starIcon = if (item.isFavorite) {
-                android.R.drawable.btn_star_big_on
+            if (item.isFavorite) {
+                ivFavorite.setImageResource(android.R.drawable.btn_star_big_on)
+                ivFavorite.setColorFilter(ContextCompat.getColor(itemView.context, R.color.accent_blue))
             } else {
-                android.R.drawable.btn_star_big_off
+                ivFavorite.setImageResource(android.R.drawable.btn_star_big_off)
+                ivFavorite.setColorFilter(ContextCompat.getColor(itemView.context, R.color.text_secondary))
             }
-            ivFavorite.setImageResource(starIcon)
 
             ivFavorite.setOnClickListener {
-                onFavoriteClick(item.code, !item.isFavorite)
+                ivFavorite.animate()
+                    .scaleX(1.2f)
+                    .scaleY(1.2f)
+                    .setDuration(100)
+                    .withEndAction {
+                        ivFavorite.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+                        onFavoriteClick(item.code, !item.isFavorite)
+                    }
+                    .start()
             }
 
             itemView.setOnClickListener {

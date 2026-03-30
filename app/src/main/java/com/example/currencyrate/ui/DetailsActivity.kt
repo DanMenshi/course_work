@@ -1,5 +1,6 @@
 package com.example.currencyrate.ui
 
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -28,6 +29,7 @@ class DetailsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailsBinding
     @Volatile
     private var currentHistoryDates: List<String> = emptyList()
+    private var selectedDays = 7
     
     private val viewModel: DetailsViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -57,7 +59,8 @@ class DetailsActivity : AppCompatActivity() {
         setupUI(code)
         observeViewModel()
 
-        viewModel.loadHistory(code, 7)
+        // Первичная загрузка
+        viewModel.loadHistory(code, selectedDays)
     }
 
     private fun setupUI(code: String) {
@@ -71,23 +74,46 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     private fun updateTabs(days: Int) {
+        if (days == selectedDays) return
+        selectedDays = days
+
+        binding.chart.clear() // Очищаем график перед загрузкой новых данных
+        
         val code = binding.tvCode.text.toString()
         viewModel.loadHistory(code, days)
         
+        val activeColor = ContextCompat.getColor(this, R.color.accent_blue)
+        val inactiveColor = ContextCompat.getColor(this, R.color.text_secondary)
+        
         if (days == 7) {
-            binding.tab7Days.setBackgroundResource(R.drawable.glass_card_bg)
-            binding.tab30Days.background = null
+            binding.tab7Days.apply {
+                setBackgroundResource(R.drawable.glass_card_bg)
+                backgroundTintList = ColorStateList.valueOf(activeColor)
+                setTextColor(Color.WHITE)
+            }
+            binding.tab30Days.apply {
+                background = null
+                setTextColor(inactiveColor)
+            }
         } else {
-            binding.tab30Days.setBackgroundResource(R.drawable.glass_card_bg)
-            binding.tab7Days.background = null
+            binding.tab30Days.apply {
+                setBackgroundResource(R.drawable.glass_card_bg)
+                backgroundTintList = ColorStateList.valueOf(activeColor)
+                setTextColor(Color.WHITE)
+            }
+            binding.tab7Days.apply {
+                background = null
+                setTextColor(inactiveColor)
+            }
         }
     }
 
     private fun observeViewModel() {
         viewModel.history.observe(this) { history ->
+            binding.chart.clear() // Гарантированная очистка при получении данных
+            
             if (history == null || history.isEmpty()) {
                 currentHistoryDates = emptyList()
-                binding.chart.clear()
                 return@observe
             }
             
