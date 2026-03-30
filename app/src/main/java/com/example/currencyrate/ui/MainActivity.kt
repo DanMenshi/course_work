@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     
-    // Инициализация ViewModel (в реальном приложении лучше использовать DI, например Hilt)
     private val viewModel: MainViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -46,13 +45,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
+        // На главном экране отображаем только избранные
         val adapter = CurrencyAdapter(
             onFavoriteClick = { code, isFav -> viewModel.toggleFavorite(code, isFav) },
             onItemClick = { currency ->
-                val intent = Intent(this, DetailsActivity::class.java).apply {
-                    putExtra("CURRENCY_CODE", currency.code)
-                }
-                startActivity(intent)
+                // Переход к деталям (если нужно) или просто лог
             }
         )
         binding.rvCurrencies.apply {
@@ -63,20 +60,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         binding.btnOpenConverter.setOnClickListener {
-            // Анимация нажатия в стиле iOS
-            it.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction {
-                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
-                startActivity(Intent(this, ConverterActivity::class.java))
-            }.start()
+            startActivity(Intent(this, ConverterActivity::class.java))
         }
         
+        // Кнопка "+" (ic_add) открывает BottomSheet со всеми валютами
         binding.btnSettings.setOnClickListener {
-            // Здесь будет открытие списка всех валют для добавления в избранное
+            val bottomSheet = AddCurrencyBottomSheet()
+            bottomSheet.show(supportFragmentManager, "AddCurrencyBottomSheet")
         }
     }
 
     private fun observeViewModel() {
-        viewModel.allCurrencies.observe(this) { currencies ->
+        // Подписываемся на избранные для главного экрана
+        viewModel.favoriteCurrencies.observe(this) { currencies ->
             (binding.rvCurrencies.adapter as CurrencyAdapter).submitList(currencies)
         }
     }

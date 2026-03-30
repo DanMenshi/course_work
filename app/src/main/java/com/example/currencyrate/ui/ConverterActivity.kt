@@ -63,9 +63,15 @@ class ConverterActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Клик по селекторам валют (заглушка для выбора)
-        binding.spinnerGive.setOnClickListener { /* TODO: Open selection dialog */ }
-        binding.spinnerReceive.setOnClickListener { /* TODO: Open selection dialog */ }
+        // Открытие выбора валют
+        binding.spinnerGive.setOnClickListener {
+            CurrencySelectorSheet.newInstance(CurrencySelectorSheet.SelectionType.GIVE)
+                .show(supportFragmentManager, "select_give")
+        }
+        binding.spinnerReceive.setOnClickListener {
+            CurrencySelectorSheet.newInstance(CurrencySelectorSheet.SelectionType.RECEIVE)
+                .show(supportFragmentManager, "select_receive")
+        }
     }
 
     private fun applySpringAnimation() {
@@ -74,14 +80,12 @@ class ConverterActivity : AppCompatActivity() {
         springAnim.spring.dampingRatio = SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY
         springAnim.start()
         
-        // Сброс угла для возможности повторной анимации
         springAnim.addEndListener { _, _, _, _ ->
             binding.btnSwap.rotation = 0f
         }
     }
 
     private fun observeViewModel() {
-        // Список всех валют для инициализации
         viewModel.allCurrencies.observe(this) { currencies ->
             if (currencies.isNotEmpty()) {
                 viewModel.setInitialCurrencies(currencies)
@@ -98,12 +102,10 @@ class ConverterActivity : AppCompatActivity() {
             binding.tvNameReceive.text = currency?.name ?: ""
         }
 
-        // Мгновенное обновление результата
         viewModel.resultAmount.observe(this) { amount ->
             binding.tvAmountReceive.text = String.format(Locale.getDefault(), "%.2f", amount)
         }
 
-        // Обновление кросс-курса
         viewModel.rateInfo.observe(this) { info ->
             binding.tvRateInfo.text = info
         }
