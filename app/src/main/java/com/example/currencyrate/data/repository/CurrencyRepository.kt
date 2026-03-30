@@ -1,11 +1,13 @@
 package com.example.currencyrate.data.repository
 
+import android.util.Log
 import com.example.currencyrate.data.local.CurrencyDao
 import com.example.currencyrate.data.local.CurrencyEntity
 import com.example.currencyrate.data.local.HistoricalRateEntity
 import com.example.currencyrate.data.remote.CbrApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -21,23 +23,59 @@ class CurrencyRepository(
     suspend fun refreshCurrencies() {
         withContext(Dispatchers.IO) {
             try {
+                Log.d("CurrencyRepository", "Fetching daily rates from CBR...")
                 val response = api.getDailyCurrencies()
-                val entities = response.valutes?.map { 
+                
+                // 1. Получаем текущие данные из БД один раз
+                val currentList = try { 
+                    dao.getAllCurrencies().first() 
+                } catch (e: Exception) { 
+                    emptyList<CurrencyEntity>() 
+                }
+                
+                // 2. Создаем карту текущих статусов "избранное"
+                val favoritesMap = currentList.associateBy({ it.code }, { it.isFavorite })
+                val isFirstRun = currentList.isEmpty()
+
+                // 3. Маппим данные из API
+                val entities = response.valutes?.map { valute ->
+                    // Если база пуста, ставим USD, EUR, CNY в избранное по умолчанию
+                    val shouldBeFavorite = if (isFirstRun) {
+                        valute.code in listOf("USD", "EUR", "CNY")
+                    } else {
+                        favoritesMap[valute.code] ?: false
+                    }
+
                     CurrencyEntity(
-                        code = it.code,
-                        name = it.name,
-                        rate = it.value.replace(",", ".").toDouble() / it.nominal,
-                        nominal = it.nominal
+                        code = valute.code,
+                        name = valute.name,
+                        rate = valute.value.replace(",", ".").toDouble() / valute.nominal,
+                        nominal = valute.nominal,
+                        isFavorite = shouldBeFavorite
                     )
                 } ?: emptyList()
                 
-                val listWithRub = entities.toMutableList().apply {
-                    add(CurrencyEntity("RUB", "Российский рубль", 1.0, 1))
+                val listToInsert = entities.toMutableList()
+                
+                // 4. Добавляем рубль, если его нет
+                if (listToInsert.none { it.code == "RUB" }) {
+                    listToInsert.add(
+                        CurrencyEntity(
+                            code = "RUB", 
+                            name = "Российский рубль", 
+                            rate = 1.0, 
+                            nominal = 1, 
+                            isFavorite = favoritesMap["RUB"] ?: false
+                        )
+                    )
                 }
                 
-                dao.insertAll(listWithRub)
+                // 5. Сохраняем (OnConflictStrategy.REPLACE обновит всё, но мы прокинули старый isFavorite)
+                dao.insertAll(listToInsert)
+                Log.d("CurrencyRepository", "Successfully updated ${listToInsert.size} currencies. First run: $isFirstRun")
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("CurrencyRepository", "Failed to refresh currencies", e)
+                throw e
             }
         }
     }
@@ -45,9 +83,6 @@ class CurrencyRepository(
     suspend fun fetchHistory(code: String, days: Int): Flow<List<HistoricalRateEntity>> {
         withContext(Dispatchers.IO) {
             try {
-                // Нам нужен внутренний ID валюты для динамики (например R01235)
-                // Для простоты в этом примере, если ID нет, можно сопоставить или получить из первого запроса
-                // Здесь я использую заглушку поиска ID, в реальном API ID передается в Valute
                 val valuteId = getValuteId(code) 
                 
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -83,7 +118,7 @@ class CurrencyRepository(
     }
 
     suspend fun toggleFavorite(code: String, isFavorite: Boolean) {
-        withContext(Dispatchers.IO) { // ДОБАВИЛИ ОБЕРТКУ
+        withContext(Dispatchers.IO) {
             dao.updateFavoriteStatus(code, isFavorite)
         }
     }

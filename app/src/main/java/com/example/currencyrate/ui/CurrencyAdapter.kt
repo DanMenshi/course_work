@@ -5,47 +5,85 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import com.example.currencyrate.data.local.CurrencyEntity
+import com.example.currencyrate.databinding.ItemCurrencyCompactBinding
 import com.example.currencyrate.databinding.ItemCurrencyGlassBinding
 import java.util.Locale
 
 class CurrencyAdapter(
     private val onFavoriteClick: (String, Boolean) -> Unit,
     private val onItemClick: (CurrencyEntity) -> Unit
-) : ListAdapter<CurrencyEntity, CurrencyAdapter.ViewHolder>(DiffCallback()) {
+) : ListAdapter<CurrencyEntity, CurrencyAdapter.BaseViewHolder>(DiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemCurrencyGlassBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+    companion object {
+        private const val TYPE_GLASS = 1
+        private const val TYPE_COMPACT = 2
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun getItemViewType(position: Int): Int {
+        return if (getItem(position).isFavorite) TYPE_GLASS else TYPE_COMPACT
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return when (viewType) {
+            TYPE_GLASS -> {
+                val binding = ItemCurrencyGlassBinding.inflate(inflater, parent, false)
+                GlassViewHolder(binding)
+            }
+            else -> {
+                val binding = ItemCurrencyCompactBinding.inflate(inflater, parent, false)
+                CompactViewHolder(binding)
+            }
+        }
+    }
+
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    inner class ViewHolder(private val binding: ItemCurrencyGlassBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: CurrencyEntity) {
-            binding.tvCode.text = item.code
-            binding.tvName.text = item.name
-            binding.tvValue.text = String.format(Locale.getDefault(), "%.2f", item.rate)
-            
-            // Здесь можно добавить логику тренда (для примера пока статика)
-            binding.tvTrend.text = "+0.15%" 
+    abstract inner class BaseViewHolder(binding: ViewBinding) : RecyclerView.ViewHolder(binding.root) {
+        abstract fun bind(item: CurrencyEntity)
+
+        protected fun setupCommonUI(
+            item: CurrencyEntity,
+            tvCode: android.widget.TextView,
+            tvName: android.widget.TextView,
+            tvValue: android.widget.TextView,
+            ivFavorite: android.widget.ImageView
+        ) {
+            tvCode.text = item.code
+            tvName.text = item.name
+            tvValue.text = String.format(Locale.getDefault(), "%.2f", item.rate)
 
             val starIcon = if (item.isFavorite) {
                 android.R.drawable.btn_star_big_on
             } else {
                 android.R.drawable.btn_star_big_off
             }
-            binding.ivFavorite.setImageResource(starIcon)
+            ivFavorite.setImageResource(starIcon)
 
-            binding.ivFavorite.setOnClickListener {
+            ivFavorite.setOnClickListener {
                 onFavoriteClick(item.code, !item.isFavorite)
             }
 
-            binding.root.setOnClickListener {
+            itemView.setOnClickListener {
                 onItemClick(item)
             }
+        }
+    }
+
+    inner class GlassViewHolder(private val binding: ItemCurrencyGlassBinding) : BaseViewHolder(binding) {
+        override fun bind(item: CurrencyEntity) {
+            setupCommonUI(item, binding.tvCode, binding.tvName, binding.tvValue, binding.ivFavorite)
+            binding.tvTrend.text = "+0.15%" // Заглушка
+        }
+    }
+
+    inner class CompactViewHolder(private val binding: ItemCurrencyCompactBinding) : BaseViewHolder(binding) {
+        override fun bind(item: CurrencyEntity) {
+            setupCommonUI(item, binding.tvCode, binding.tvName, binding.tvValue, binding.ivFavorite)
         }
     }
 

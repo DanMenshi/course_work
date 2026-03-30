@@ -2,8 +2,10 @@ package com.example.currencyrate.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,16 +47,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        // На главном экране отображаем только избранные
         val adapter = CurrencyAdapter(
             onFavoriteClick = { code, isFav -> viewModel.toggleFavorite(code, isFav) },
             onItemClick = { currency ->
-                // Переход к деталям (если нужно) или просто лог
+                val intent = Intent(this, DetailsActivity::class.java).apply {
+                    putExtra("CURRENCY_CODE", currency.code)
+                }
+                startActivity(intent)
             }
         )
         binding.rvCurrencies.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             this.adapter = adapter
+            // Начальное состояние для анимации появления
+            alpha = 0f
         }
     }
 
@@ -63,17 +69,33 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, ConverterActivity::class.java))
         }
         
-        // Кнопка "+" (ic_add) открывает BottomSheet со всеми валютами
         binding.btnSettings.setOnClickListener {
-            val bottomSheet = AddCurrencyBottomSheet()
-            bottomSheet.show(supportFragmentManager, "AddCurrencyBottomSheet")
+            AddCurrencyBottomSheet().show(supportFragmentManager, "AddCurrencyBottomSheet")
         }
     }
 
     private fun observeViewModel() {
-        // Подписываемся на избранные для главного экрана
+        // Подписка на список валют
         viewModel.favoriteCurrencies.observe(this) { currencies ->
             (binding.rvCurrencies.adapter as CurrencyAdapter).submitList(currencies)
+        }
+
+        // Подписка на состояние загрузки
+        viewModel.isLoading.observe(this) { isLoading ->
+            binding.pbLoading.isVisible = isLoading
+            
+            if (!isLoading) {
+                // Плавное появление списка при завершении загрузки
+                binding.rvCurrencies.animate()
+                    .alpha(1f)
+                    .setDuration(500)
+                    .start()
+            }
+        }
+
+        // Подписка на статус синхронизации
+        viewModel.syncStatus.observe(this) { status ->
+            binding.tvSubtitle.text = status
         }
     }
 }

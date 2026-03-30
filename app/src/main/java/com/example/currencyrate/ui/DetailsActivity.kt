@@ -18,6 +18,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import retrofit2.Retrofit
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.util.Locale
@@ -25,6 +26,7 @@ import java.util.Locale
 class DetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailsBinding
+    private var currentHistoryDates: List<String> = emptyList()
     
     private val viewModel: DetailsViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -51,7 +53,7 @@ class DetailsActivity : AppCompatActivity() {
         setupUI(code)
         observeViewModel()
         
-        viewModel.loadHistory(code, 7) // По умолчанию за 7 дней
+        viewModel.loadHistory(code, 7)
     }
 
     private fun setupUI(code: String) {
@@ -68,23 +70,29 @@ class DetailsActivity : AppCompatActivity() {
         val code = binding.tvCode.text.toString()
         viewModel.loadHistory(code, days)
         
-        // Визуальное переключение
+        val activeColor = ContextCompat.getColor(this, R.color.accent_blue)
+        val inactiveColor = Color.TRANSPARENT
+
         if (days == 7) {
             binding.tab7Days.setBackgroundResource(R.drawable.glass_card_bg)
-            binding.tab7Days.backgroundTintList = ContextCompat.getColorStateList(this, R.color.glass_white_20)
             binding.tab30Days.background = null
         } else {
             binding.tab30Days.setBackgroundResource(R.drawable.glass_card_bg)
-            binding.tab30Days.backgroundTintList = ContextCompat.getColorStateList(this, R.color.glass_white_20)
             binding.tab7Days.background = null
         }
     }
 
     private fun observeViewModel() {
         viewModel.history.observe(this) { history ->
+            currentHistoryDates = history.map { it.date }
             val entries = history.mapIndexed { index, entity ->
                 Entry(index.toFloat(), entity.rate.toFloat())
             }
+            
+            // Настройка маркера с актуальными датами
+            val marker = CustomMarkerView(this, R.layout.layout_chart_marker, currentHistoryDates)
+            binding.chart.marker = marker
+            
             updateChartData(entries)
         }
 
@@ -98,20 +106,30 @@ class DetailsActivity : AppCompatActivity() {
         chart.apply {
             description.isEnabled = false
             setTouchEnabled(true)
-            setPinchZoom(false)
             setDrawGridBackground(false)
+            setExtraOffsets(10f, 10f, 10f, 20f)
             
             xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
-                textColor = Color.WHITE
+                textColor = Color.parseColor("#80FFFFFF")
                 setDrawGridLines(false)
                 setDrawAxisLine(false)
+                granularity = 1f
+                valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float): String {
+                        val index = value.toInt()
+                        return if (index in currentHistoryDates.indices) {
+                            val parts = currentHistoryDates[index].split("-")
+                            "${parts[2]}.${parts[1]}"
+                        } else ""
+                    }
+                }
             }
             
             axisLeft.apply {
-                textColor = Color.WHITE
+                textColor = Color.parseColor("#80FFFFFF")
                 setDrawGridLines(true)
-                gridColor = Color.parseColor("#33FFFFFF")
+                gridColor = Color.parseColor("#1AFFFFFF")
                 setDrawAxisLine(false)
             }
             
@@ -121,18 +139,22 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     private fun updateChartData(entries: List<Entry>) {
-        val dataSet = LineDataSet(entries, "Курс").apply {
+        val dataSet = LineDataSet(entries, "Rate").apply {
             mode = LineDataSet.Mode.CUBIC_BEZIER
             color = ContextCompat.getColor(this@DetailsActivity, R.color.accent_blue)
+            lineWidth = 3f
             setDrawCircles(false)
             setDrawValues(false)
-            lineWidth = 3f
+            setDrawHighlightIndicators(true)
+            highLightColor = Color.WHITE
+            highlightLineWidth = 1f
             
             setDrawFilled(true)
             fillDrawable = ContextCompat.getDrawable(this@DetailsActivity, R.drawable.chart_gradient)
         }
 
         binding.chart.data = LineData(dataSet)
-        binding.chart.animateX(800)
+        binding.chart.invalidate()
+        binding.chart.animateX(600)
     }
 }
