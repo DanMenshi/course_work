@@ -63,38 +63,42 @@ class ConverterActivity : AppCompatActivity() {
         })
     }
 
+    private fun applySpringAnimation() {
+        val springAnim = SpringAnimation(binding.btnSwap, SpringAnimation.ROTATION, 180f)
+        springAnim.spring.stiffness = SpringForce.STIFFNESS_LOW
+        springAnim.spring.dampingRatio = SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY
+        springAnim.start()
+        // Сброс угла после анимации (упрощенно)
+        binding.btnSwap.rotation = 0f
+    }
+
     private fun observeViewModel() {
         viewModel.currencyGive.observe(this) { currency ->
-            binding.tvCodeGive.text = currency.code
-            binding.tvNameGive.text = currency.name
+            currency?.let {
+                binding.tvCodeGive.text = it.code
+                binding.tvNameGive.text = it.name
+            }
         }
 
         viewModel.currencyReceive.observe(this) { currency ->
-            binding.tvCodeReceive.text = currency.code
-            binding.tvNameReceive.text = currency.name
+            currency?.let {
+                binding.tvCodeReceive.text = it.code
+                binding.tvNameReceive.text = it.name
+            }
         }
 
         viewModel.resultAmount.observe(this) { amount ->
             binding.tvAmountReceive.text = String.format(Locale.getDefault(), "%.2f", amount)
         }
-    }
-
-    private fun applySpringAnimation() {
-        // Анимация вращения кнопки
-        val rotationAnim = SpringAnimation(binding.btnSwap, SpringAnimation.ROTATION, binding.btnSwap.rotation + 180f)
-        rotationAnim.spring.dampingRatio = SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY
-        rotationAnim.spring.stiffness = SpringForce.STIFFNESS_LOW
-        rotationAnim.start()
-
-        // Анимация "встряски" карточек при свопе
-        val shakeAnim1 = SpringAnimation(binding.cvGive, SpringAnimation.TRANSLATION_Y, 0f)
-        shakeAnim1.setStartVelocity(1000f)
-        shakeAnim1.spring.dampingRatio = SpringForce.DAMPING_RATIO_HIGH_BOUNCY
-        shakeAnim1.start()
-
-        val shakeAnim2 = SpringAnimation(binding.cvReceive, SpringAnimation.TRANSLATION_Y, 0f)
-        shakeAnim2.setStartVelocity(-1000f)
-        shakeAnim2.spring.dampingRatio = SpringForce.DAMPING_RATIO_HIGH_BOUNCY
-        shakeAnim2.start()
+        
+        // Автоматическая установка валют, если они еще не выбраны
+        viewModel.allCurrencies.observe(this) { currencies ->
+            if (currencies.isNotEmpty() && viewModel.currencyGive.value == null) {
+                viewModel.selectGiveCurrency(currencies[0])
+                if (currencies.size > 1) {
+                    viewModel.selectReceiveCurrency(currencies[1])
+                }
+            }
+        }
     }
 }

@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CurrencyRate">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,10 +23,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ConverterActivity"
+            android:name=".ui.ConverterActivity"
             android:exported="false" />
         <activity
-            android:name=".DetailsActivity"
+            android:name=".ui.DetailsActivity"
             android:exported="false" />
     </application>
 
