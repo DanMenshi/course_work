@@ -10,6 +10,7 @@ import androidx.dynamicanimation.animation.SpringForce
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.currencyrate.data.local.AppDatabase
+import com.example.currencyrate.data.local.CurrencyEntity
 import com.example.currencyrate.data.remote.CbrApi
 import com.example.currencyrate.data.repository.CurrencyRepository
 import com.example.currencyrate.databinding.ActivityConverterBinding
@@ -61,6 +62,10 @@ class ConverterActivity : AppCompatActivity() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        // Клик по селекторам валют (заглушка для выбора)
+        binding.spinnerGive.setOnClickListener { /* TODO: Open selection dialog */ }
+        binding.spinnerReceive.setOnClickListener { /* TODO: Open selection dialog */ }
     }
 
     private fun applySpringAnimation() {
@@ -68,37 +73,39 @@ class ConverterActivity : AppCompatActivity() {
         springAnim.spring.stiffness = SpringForce.STIFFNESS_LOW
         springAnim.spring.dampingRatio = SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY
         springAnim.start()
-        // Сброс угла после анимации (упрощенно)
-        binding.btnSwap.rotation = 0f
+        
+        // Сброс угла для возможности повторной анимации
+        springAnim.addEndListener { _, _, _, _ ->
+            binding.btnSwap.rotation = 0f
+        }
     }
 
     private fun observeViewModel() {
-        viewModel.currencyGive.observe(this) { currency ->
-            currency?.let {
-                binding.tvCodeGive.text = it.code
-                binding.tvNameGive.text = it.name
+        // Список всех валют для инициализации
+        viewModel.allCurrencies.observe(this) { currencies ->
+            if (currencies.isNotEmpty()) {
+                viewModel.setInitialCurrencies(currencies)
             }
+        }
+
+        viewModel.currencyGive.observe(this) { currency ->
+            binding.tvCodeGive.text = currency?.code ?: ""
+            binding.tvNameGive.text = currency?.name ?: ""
         }
 
         viewModel.currencyReceive.observe(this) { currency ->
-            currency?.let {
-                binding.tvCodeReceive.text = it.code
-                binding.tvNameReceive.text = it.name
-            }
+            binding.tvCodeReceive.text = currency?.code ?: ""
+            binding.tvNameReceive.text = currency?.name ?: ""
         }
 
+        // Мгновенное обновление результата
         viewModel.resultAmount.observe(this) { amount ->
             binding.tvAmountReceive.text = String.format(Locale.getDefault(), "%.2f", amount)
         }
-        
-        // Автоматическая установка валют, если они еще не выбраны
-        viewModel.allCurrencies.observe(this) { currencies ->
-            if (currencies.isNotEmpty() && viewModel.currencyGive.value == null) {
-                viewModel.selectGiveCurrency(currencies[0])
-                if (currencies.size > 1) {
-                    viewModel.selectReceiveCurrency(currencies[1])
-                }
-            }
+
+        // Обновление кросс-курса
+        viewModel.rateInfo.observe(this) { info ->
+            binding.tvRateInfo.text = info
         }
     }
 }

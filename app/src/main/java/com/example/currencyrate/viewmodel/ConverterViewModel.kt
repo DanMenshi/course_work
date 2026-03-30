@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import com.example.currencyrate.data.local.CurrencyEntity
 import com.example.currencyrate.data.repository.CurrencyRepository
+import java.util.Locale
 
 class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel() {
 
@@ -20,8 +21,25 @@ class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel
     private val _resultAmount = MutableLiveData<Double>()
     val resultAmount: LiveData<Double> = _resultAmount
 
-    fun setInitialCurrencies(giveCode: String, receiveCode: String) {
-        // В реальном приложении дождемся загрузки из репозитория
+    private val _rateInfo = MutableLiveData<String>()
+    val rateInfo: LiveData<String> = _rateInfo
+
+    private var currentInput: Double = 0.0
+
+    /**
+     * Инициализация валют по умолчанию (USD -> RUB)
+     */
+    fun setInitialCurrencies(currencies: List<CurrencyEntity>) {
+        if (_currencyGive.value != null && _currencyReceive.value != null) return
+        
+        val usd = currencies.find { it.code == "USD" }
+        // Если RUB нет в списке (обычно CBR присылает только иностранные валюты), создаем объект вручную
+        val rub = currencies.find { it.code == "RUB" } ?: CurrencyEntity("RUB", "Российский рубль", 1.0, 1)
+
+        if (_currencyGive.value == null) _currencyGive.value = usd ?: currencies.firstOrNull()
+        if (_currencyReceive.value == null) _currencyReceive.value = rub
+        
+        calculate()
     }
 
     fun selectGiveCurrency(currency: CurrencyEntity) {
@@ -34,25 +52,39 @@ class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel
         calculate()
     }
 
-    private var currentInput: Double = 0.0
-
     fun onInputChanged(input: String) {
-        currentInput = input.toDoubleOrNull() ?: 0.0
+        currentInput = input.replace(",", ".").toDoubleOrNull() ?: 0.0
         calculate()
     }
 
     private fun calculate() {
         val give = _currencyGive.value ?: return
         val receive = _currencyReceive.value ?: return
+
+        // Вычисляем курс за 1 единицу
+        val rateGive = give.rate / give.nominal
+        val rateReceive = receive.rate / receive.nominal
+
+        val result = currentInput * (rateGive / rateReceive)
+        _resultAmount.value = result
         
-        val rate = give.rate / receive.rate
-        _resultAmount.value = currentInput * rate
+        updateRateInfo(give, receive)
+    }
+
+    private fun updateRateInfo(give: CurrencyEntity, receive: CurrencyEntity) {
+        val rateGive = give.rate / give.nominal
+        val rateReceive = receive.rate / receive.nominal
+        val crossRate = rateGive / rateReceive
+        _rateInfo.value = String.format(Locale.US, "1 %s = %.4f %s", give.code, crossRate, receive.code)
     }
 
     fun swapCurrencies() {
-        val temp = _currencyGive.value
-        _currencyGive.value = _currencyReceive.value
-        _currencyReceive.value = temp
-        calculate()
+        val give = _currencyGive.value
+        val receive = _currencyReceive.value
+        if (give != null && receive != null) {
+            _currencyGive.value = receive
+            _currencyReceive.value = give
+            calculate()
+        }
     }
 }
