@@ -5,39 +5,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.currencyrate.data.local.AppDatabase
 import com.example.currencyrate.data.local.CurrencyEntity
-import com.example.currencyrate.data.remote.CbrApi
-import com.example.currencyrate.data.repository.CurrencyRepository
 import com.example.currencyrate.databinding.LayoutBottomSheetAddBinding
 import com.example.currencyrate.viewmodel.ConverterViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import retrofit2.Retrofit
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 
 class CurrencySelectorSheet : BottomSheetDialogFragment() {
 
     private var _binding: LayoutBottomSheetAddBinding? = null
     private val binding get() = _binding!!
 
-    // Используем ту же ViewModel, что и в ConverterActivity
-    private val viewModel: ConverterViewModel by activityViewModels {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val database = AppDatabase.getDatabase(requireContext().applicationContext)
-                val retrofit = Retrofit.Builder()
-                    .baseUrl("https://www.cbr.ru/")
-                    .addConverterFactory(SimpleXmlConverterFactory.create())
-                    .build()
-                val api = retrofit.create(CbrApi::class.java)
-                val repository = CurrencyRepository(api, database.currencyDao())
-                return ConverterViewModel(repository) as T
-            }
-        }
-    }
+    // Используем ту же ViewModel, что и в ConverterActivity, без повторной инициализации
+    private val viewModel: ConverterViewModel by activityViewModels()
 
     private var selectionType: SelectionType = SelectionType.GIVE
 
@@ -80,7 +60,7 @@ class CurrencySelectorSheet : BottomSheetDialogFragment() {
             // Добавляем рубль в список для выбора, если его там нет
             val list = currencies.toMutableList()
             if (list.none { it.code == "RUB" }) {
-                list.add(0, CurrencyEntity("RUB", "Российский рубль", 1.0, 1))
+                list.add(0, CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1))
             }
             adapter.submitList(list)
         }

@@ -26,6 +26,7 @@ import java.util.Locale
 class DetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailsBinding
+    @Volatile
     private var currentHistoryDates: List<String> = emptyList()
     
     private val viewModel: DetailsViewModel by viewModels {
@@ -43,12 +44,15 @@ class DetailsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {super.onCreate(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         binding = ActivityDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Если intent вернул null, используем 'USD'
-        val code = intent.getStringExtra("CURRENCY_CODE") ?: "USD"
+        val code = intent.getStringExtra("CURRENCY_CODE") ?: run {
+            finish()
+            return
+        }
 
         setupUI(code)
         observeViewModel()
@@ -70,9 +74,6 @@ class DetailsActivity : AppCompatActivity() {
         val code = binding.tvCode.text.toString()
         viewModel.loadHistory(code, days)
         
-        val activeColor = ContextCompat.getColor(this, R.color.accent_blue)
-        val inactiveColor = Color.TRANSPARENT
-
         if (days == 7) {
             binding.tab7Days.setBackgroundResource(R.drawable.glass_card_bg)
             binding.tab30Days.background = null
@@ -84,21 +85,30 @@ class DetailsActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.history.observe(this) { history ->
-            currentHistoryDates = history.map { it.date }
+            if (history == null || history.isEmpty()) {
+                currentHistoryDates = emptyList()
+                binding.chart.clear()
+                return@observe
+            }
+            
+            val newDates = history.map { it.date }
+            currentHistoryDates = newDates
+            
             val entries = history.mapIndexed { index, entity ->
                 Entry(index.toFloat(), entity.rate.toFloat())
             }
             
-            // Настройка маркера с актуальными датами
-            val marker = CustomMarkerView(this, R.layout.layout_chart_marker, currentHistoryDates)
+            val marker = CustomMarkerView(this, R.layout.layout_chart_marker, newDates)
             binding.chart.marker = marker
             
             updateChartData(entries)
         }
 
         viewModel.stats.observe(this) { stats ->
-            binding.tvMin.text = String.format(Locale.getDefault(), "%.2f", stats.first)
-            binding.tvMax.text = String.format(Locale.getDefault(), "%.2f", stats.second)
+            if (stats != null) {
+                binding.tvMin.text = String.format(Locale.getDefault(), "%.2f", stats.first)
+                binding.tvMax.text = String.format(Locale.getDefault(), "%.2f", stats.second)
+            }
         }
     }
 
@@ -118,10 +128,17 @@ class DetailsActivity : AppCompatActivity() {
                 valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
                         val index = value.toInt()
-                        return if (index in currentHistoryDates.indices) {
-                            val parts = currentHistoryDates[index].split("-")
-                            "${parts[2]}.${parts[1]}"
-                        } else ""
+                        val dates = currentHistoryDates
+                        if (index >= 0 && index < dates.size) {
+                            val rawDate = dates[index]
+                            return try {
+                                val parts = rawDate.split("-")
+                                if (parts.size >= 3) "${parts[2]}.${parts[1]}" else rawDate
+                            } catch (e: Exception) {
+                                rawDate
+                            }
+                        }
+                        return ""
                     }
                 }
             }
@@ -139,6 +156,10 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     private fun updateChartData(entries: List<Entry>) {
+        if (entries.isEmpty()) {
+            binding.chart.clear()
+            return
+        }
         val dataSet = LineDataSet(entries, "Rate").apply {
             mode = LineDataSet.Mode.CUBIC_BEZIER
             color = ContextCompat.getColor(this@DetailsActivity, R.color.accent_blue)

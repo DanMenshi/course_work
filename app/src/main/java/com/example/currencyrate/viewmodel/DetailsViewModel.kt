@@ -22,9 +22,12 @@ class DetailsViewModel(private val repository: CurrencyRepository) : ViewModel()
             repository.fetchHistory(code, days).collectLatest { list ->
                 if (list.isNotEmpty()) {
                     _history.value = list
-                    val min = list.minBy { it.rate }.rate
-                    val max = list.maxBy { it.rate }.rate
+                    val min = list.minByOrNull { it.rate }?.rate ?: 0.0
+                    val max = list.maxByOrNull { it.rate }?.rate ?: 0.0
                     _stats.value = min to max
+                } else {
+                    _history.value = emptyList()
+                    _stats.value = 0.0 to 0.0
                 }
             }
         }

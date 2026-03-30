@@ -34,7 +34,7 @@ class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel
         
         val usd = currencies.find { it.code == "USD" }
         // Если RUB нет в списке (обычно CBR присылает только иностранные валюты), создаем объект вручную
-        val rub = currencies.find { it.code == "RUB" } ?: CurrencyEntity("RUB", "Российский рубль", 1.0, 1)
+        val rub = currencies.find { it.code == "RUB" } ?: CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1)
 
         if (_currencyGive.value == null) _currencyGive.value = usd ?: currencies.firstOrNull()
         if (_currencyReceive.value == null) _currencyReceive.value = rub

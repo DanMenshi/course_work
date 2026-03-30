@@ -8,11 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CurrencyDao {
-    /**
-     * Возвращает все валюты, отсортированные:
-     * 1. Сначала избранные (isFavorite = 1)
-     * 2. Затем по коду валюты алфавиту
-     */
     @Query("SELECT * FROM currencies ORDER BY isFavorite DESC, code ASC")
     fun getAllCurrencies(): Flow<List<CurrencyEntity>>
 
@@ -30,4 +25,7 @@ interface CurrencyDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHistoricalRates(rates: List<HistoricalRateEntity>)
+
+    @Query("SELECT cbrId FROM currencies WHERE code = :code LIMIT 1")
+    suspend fun getCbrIdByCode(code: String): String?
 }

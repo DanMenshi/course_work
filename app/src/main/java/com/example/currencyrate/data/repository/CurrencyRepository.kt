@@ -26,20 +26,16 @@ class CurrencyRepository(
                 Log.d("CurrencyRepository", "Fetching daily rates from CBR...")
                 val response = api.getDailyCurrencies()
                 
-                // 1. Получаем текущие данные из БД один раз
                 val currentList = try { 
                     dao.getAllCurrencies().first() 
                 } catch (e: Exception) { 
                     emptyList<CurrencyEntity>() 
                 }
                 
-                // 2. Создаем карту текущих статусов "избранное"
                 val favoritesMap = currentList.associateBy({ it.code }, { it.isFavorite })
                 val isFirstRun = currentList.isEmpty()
 
-                // 3. Маппим данные из API
                 val entities = response.valutes?.map { valute ->
-                    // Если база пуста, ставим USD, EUR, CNY в избранное по умолчанию
                     val shouldBeFavorite = if (isFirstRun) {
                         valute.code in listOf("USD", "EUR", "CNY")
                     } else {
@@ -48,6 +44,7 @@ class CurrencyRepository(
 
                     CurrencyEntity(
                         code = valute.code,
+                        cbrId = valute.id,
                         name = valute.name,
                         rate = valute.value.replace(",", ".").toDouble() / valute.nominal,
                         nominal = valute.nominal,
@@ -57,11 +54,11 @@ class CurrencyRepository(
                 
                 val listToInsert = entities.toMutableList()
                 
-                // 4. Добавляем рубль, если его нет
                 if (listToInsert.none { it.code == "RUB" }) {
                     listToInsert.add(
                         CurrencyEntity(
                             code = "RUB", 
+                            cbrId = "R00000",
                             name = "Российский рубль", 
                             rate = 1.0, 
                             nominal = 1, 
@@ -70,7 +67,6 @@ class CurrencyRepository(
                     )
                 }
                 
-                // 5. Сохраняем (OnConflictStrategy.REPLACE обновит всё, но мы прокинули старый isFavorite)
                 dao.insertAll(listToInsert)
                 Log.d("CurrencyRepository", "Successfully updated ${listToInsert.size} currencies. First run: $isFirstRun")
             } catch (e: Exception) {
@@ -83,7 +79,7 @@ class CurrencyRepository(
     suspend fun fetchHistory(code: String, days: Int): Flow<List<HistoricalRateEntity>> {
         withContext(Dispatchers.IO) {
             try {
-                val valuteId = getValuteId(code) 
+                val valuteId = dao.getCbrIdByCode(code) ?: "R01235"
                 
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val end = Calendar.getInstance()
@@ -105,16 +101,6 @@ class CurrencyRepository(
             }
         }
         return dao.getHistoricalRates(code)
-    }
-
-    private fun getValuteId(code: String): String {
-        return when(code) {
-            "USD" -> "R01235"
-            "EUR" -> "R01239"
-            "CNY" -> "R01375"
-            "KZT" -> "R01335"
-            else -> "R01235" // Возвращаем ID доллара по умолчанию, если валюта неизвестна
-        }
     }
 
     suspend fun toggleFavorite(code: String, isFavorite: Boolean) {
