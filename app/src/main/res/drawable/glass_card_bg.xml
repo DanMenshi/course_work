@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Полупрозрачный белый фон для эффекта стекла -->
+    <solid android:color="@color/glass_white_10" />
+
+    <!-- Скругляем углы для современного вида -->
+    <corners android:radius="24dp" />
+
+    <!-- Тонкая белая рамка (контур) -->
+    <stroke
+        android:width="1dp"
+        android:color="@color/glass_stroke" />
+</shape>

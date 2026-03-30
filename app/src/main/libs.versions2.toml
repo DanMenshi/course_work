@@ -1,0 +1,8 @@
+toml
+[versions]
+# ...
+blurview = "2.0.3"
+
+[libraries]
+# ...
+blurview = { group = "com.github.Dimezis", name = "BlurView", version.ref = "blurview" }

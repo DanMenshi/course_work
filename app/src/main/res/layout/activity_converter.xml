@@ -1,29 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_main"
-    android:padding="20dp">
+    android:background="@drawable/main_gradient_bg">
 
     <ImageView
         android:id="@+id/btnBack"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="8dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="56dp"
+        android:background="@drawable/glass_card_bg"
+        android:padding="12dp"
         android:src="@android:drawable/ic_menu_revert"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/text_main" />
+        app:tint="@color/text_primary" />
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-black"
-        android:text="Конвертер валют"
-        android:textColor="@color/text_main"
-        android:textSize="22sp"
+        android:text="Конвертер"
+        android:textColor="@color/text_primary"
+        android:textSize="28sp"
         app:layout_constraintBottom_toBottomOf="@id/btnBack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,8 +37,9 @@
         android:id="@+id/cvGive"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:cardBackgroundColor="@color/bg_card"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="40dp"
+        app:cardBackgroundColor="@android:color/transparent"
         app:cardCornerRadius="24dp"
         app:cardElevation="0dp"
         app:layout_constraintTop_toBottomOf="@id/tvTitle">
@@ -43,7 +47,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="20dp">
+            android:background="@drawable/glass_card_bg"
+            android:padding="24dp">
 
             <TextView
                 android:id="@+id/labelGive"
@@ -58,12 +63,10 @@
                 android:id="@+id/spinnerGive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/card_bg_selector"
+                android:background="@drawable/glass_card_bg"
                 android:gravity="center"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
-                android:clickable="true"
-                android:focusable="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -71,30 +74,30 @@
                     android:id="@+id/tvCodeGive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="us USD"
-                    android:textColor="@color/text_main"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"/>
+                    android:fontFamily="sans-serif-medium"
+                    android:text="USD"
+                    android:textColor="@color/text_primary" />
+
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
+                    android:layout_marginStart="4dp"
                     android:src="@android:drawable/arrow_down_float"
                     app:tint="@color/text_secondary" />
             </LinearLayout>
 
             <EditText
                 android:id="@+id/etAmountGive"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:background="@null"
                 android:fontFamily="sans-serif-black"
+                android:hint="0"
                 android:inputType="numberDecimal"
-                android:text="100"
-                android:textColor="@color/text_main"
-                android:textSize="40sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/glass_white_20"
+                android:textSize="44sp"
                 app:layout_constraintTop_toBottomOf="@id/labelGive" />
 
             <TextView
@@ -105,34 +108,32 @@
                 android:textColor="@color/text_secondary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/etAmountGive" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Кнопка смены -->
+    <!-- Кнопка Swap (Пружинная) -->
     <ImageView
         android:id="@+id/btnSwap"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:background="@drawable/circle_bg"
+        android:background="@drawable/glass_card_bg"
         android:elevation="4dp"
-        android:padding="16dp"
+        android:padding="14dp"
         android:src="@android:drawable/stat_notify_sync"
-        android:clickable="true"
-        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="@id/cvGive"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cvGive"
-        app:tint="@color/bg_main" />
+        app:tint="@color/accent_blue" />
 
     <!-- Блок "Получаете" -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cvReceive"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:cardBackgroundColor="@color/bg_card"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="@android:color/transparent"
         app:cardCornerRadius="24dp"
         app:cardElevation="0dp"
         app:layout_constraintTop_toBottomOf="@id/btnSwap">
@@ -140,7 +141,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="20dp">
+            android:background="@drawable/glass_card_bg"
+            android:padding="24dp">
 
             <TextView
                 android:id="@+id/labelReceive"
@@ -155,12 +157,10 @@
                 android:id="@+id/spinnerReceive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/card_bg_selector"
+                android:background="@drawable/glass_card_bg"
                 android:gravity="center"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
-                android:clickable="true"
-                android:focusable="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -168,28 +168,27 @@
                     android:id="@+id/tvCodeReceive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ru RUB"
-                    android:textColor="@color/text_main"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"/>
+                    android:fontFamily="sans-serif-medium"
+                    android:text="RUB"
+                    android:textColor="@color/text_primary" />
+
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
+                    android:layout_marginStart="4dp"
                     android:src="@android:drawable/arrow_down_float"
                     app:tint="@color/text_secondary" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/tvAmountReceive"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:fontFamily="sans-serif-black"
-                android:text="9293.43"
-                android:textColor="@color/text_main"
-                android:textSize="40sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                android:text="0.00"
+                android:textColor="@color/accent_blue"
+                android:textSize="44sp"
                 app:layout_constraintTop_toBottomOf="@id/labelReceive" />
 
             <TextView
@@ -200,89 +199,19 @@
                 android:textColor="@color/text_secondary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvAmountReceive" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cvExchangeRate"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvRateInfo"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        app:cardBackgroundColor="@color/bg_card"
-        app:cardCornerRadius="16dp"
-        app:layout_constraintTop_toBottomOf="@id/cvReceive">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Курс обмена"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"/>
-            <TextView
-                android:id="@+id/tvExchangeRateText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1 USD = 92.9343 RUB"
-                android:textColor="@color/text_main"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-black"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/cvExchangeRate">
-
-        <Button
-            android:id="@+id/btn100"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:text="100"
-            android:backgroundTint="@color/bg_card"
-            android:textColor="@color/text_main"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
-        <Button
-            android:id="@+id/btn500"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginHorizontal="4dp"
-            android:text="500"
-            android:backgroundTint="@color/bg_card"
-            android:textColor="@color/text_main"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
-        <Button
-            android:id="@+id/btn1000"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginHorizontal="4dp"
-            android:text="1000"
-            android:backgroundTint="@color/bg_card"
-            android:textColor="@color/text_main"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
-        <Button
-            android:id="@+id/btn5000"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="5000"
-            android:backgroundTint="@color/bg_card"
-            android:textColor="@color/text_main"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
-    </LinearLayout>
+        android:fontFamily="sans-serif-medium"
+        android:text="1 USD = 92.42 RUB"
+        android:textColor="@color/glass_white_20"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cvReceive" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

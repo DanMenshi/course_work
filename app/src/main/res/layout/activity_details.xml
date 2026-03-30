@@ -1,200 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_main"
+    android:background="@drawable/main_gradient_bg"
     android:padding="20dp">
 
     <ImageView
         android:id="@+id/btnBack"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="8dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/glass_card_bg"
+        android:padding="12dp"
         android:src="@android:drawable/ic_menu_revert"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/text_main" />
+        app:tint="@color/text_primary" />
 
     <TextView
-        android:id="@+id/tvTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="02:18"
-        android:textColor="@color/text_secondary"
-        app:layout_constraintBottom_toBottomOf="@id/btnBack"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btnBack" />
-
-    <ImageView
-        android:id="@+id/btnRefresh"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="8dp"
-        android:src="@android:drawable/stat_notify_sync"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/text_main" />
-
-    <TextView
-        android:id="@+id/tvCurrencyCode"
+        android:id="@+id/tvCode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:fontFamily="sans-serif-black"
         android:text="USD"
-        android:textColor="@color/text_main"
+        android:textColor="@color/text_primary"
         android:textSize="32sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnBack" />
 
     <TextView
-        android:id="@+id/tvCurrencyName"
+        android:id="@+id/tvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Доллар США"
         android:textColor="@color/text_secondary"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvCurrencyCode" />
+        app:layout_constraintTop_toBottomOf="@id/tvCode" />
 
     <TextView
-        android:id="@+id/tvTrend"
+        android:id="@+id/tvCurrentValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="↗ +0.68%"
-        android:textColor="@color/green_up"
-        android:fontFamily="sans-serif-medium"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvCurrencyCode" />
-
-    <TextView
-        android:id="@+id/tvCurrentRate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:fontFamily="sans-serif-black"
-        android:text="92.26 ₽"
-        android:textColor="@color/text_main"
+        android:text="92.42 ₽"
+        android:textColor="@color/text_primary"
         android:textSize="44sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvCurrencyName" />
+        app:layout_constraintTop_toBottomOf="@id/tvName" />
 
-    <TextView
-        android:id="@+id/tvUnit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="за 1 USD"
-        android:textColor="@color/text_secondary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvCurrentRate" />
-
+    <!-- Переключатель периодов -->
     <LinearLayout
         android:id="@+id/llTabs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/card_bg_selector"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/glass_card_bg"
         android:padding="4dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvUnit">
+        app:layout_constraintTop_toBottomOf="@id/tvCurrentValue">
 
         <TextView
+            android:id="@+id/tab7Days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/white_tab_bg"
-            android:paddingHorizontal="16dp"
+            android:background="@drawable/glass_card_bg"
+            android:backgroundTint="@color/glass_white_20"
+            android:paddingHorizontal="20dp"
             android:paddingVertical="8dp"
             android:text="7 дней"
-            android:textColor="@color/bg_main"
+            android:textColor="@color/text_primary"
             android:fontFamily="sans-serif-medium" />
 
         <TextView
+            android:id="@+id/tab30Days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="20dp"
             android:paddingVertical="8dp"
             android:text="30 дней"
-            android:textColor="@color/text_main"
+            android:textColor="@color/text_secondary"
             android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chart"
+    <!-- Стеклянная карточка графика -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvChart"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/card_bg_selector"
-        android:padding="8dp"
-        app:layout_constraintTop_toBottomOf="@id/llTabs" />
+        android:layout_height="260dp"
+        android:layout_marginTop="20dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toBottomOf="@id/llTabs">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/glass_card_bg"
+            android:padding="8dp">
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Статистика -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/chart">
+        app:layout_constraintTop_toBottomOf="@id/cvChart">
 
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-            <LinearLayout
-                android:layout_width="match_parent"
+            android:background="@drawable/glass_card_bg"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginEnd="8dp">
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Минимум"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="90.92"
-                    android:textColor="@color/text_main"
-                    android:textSize="20sp"
-                    android:fontFamily="sans-serif-black"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                android:text="Минимум"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/tvMin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:text="90.12"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp" />
+        </LinearLayout>
 
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-            <LinearLayout
-                android:layout_width="match_parent"
+            android:background="@drawable/glass_card_bg"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginStart="8dp">
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Максимум"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="93.63"
-                    android:textColor="@color/text_main"
-                    android:textSize="20sp"
-                    android:fontFamily="sans-serif-black"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                android:text="Максимум"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/tvMax"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:text="93.45"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp" />
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

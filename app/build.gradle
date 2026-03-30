@@ -1,19 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace 'com.example.currencyrate'
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.currencyrate"
         minSdk 24
-        targetSdk 36
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -27,29 +25,48 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    buildFeatures {
+        viewBinding true
     }
 }
 
 dependencies {
-    implementation libs.appcompat
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.appcompat
     implementation libs.material
-    implementation libs.activity
-    implementation libs.constraintlayout
-    testImplementation libs.junit
-    androidTestImplementation libs.ext.junit
-    androidTestImplementation libs.espresso.core
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.dynamicanimation
 
-    // Стандартные библиотеки...
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'com.google.android.material:material:1.13.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-
-    // Библиотеки для сети (API)
-    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
-    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
-
-    // Библиотека для графиков (Экран 3)
+    // Lifecycle & ViewModel
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.lifecycle.livedata.ktx
+    
+    // Room
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    ksp libs.androidx.room.compiler
+    
+    // Networking
+    implementation libs.retrofit
+    implementation libs.retrofit.converter.simplexml
+    implementation libs.retrofit.converter.gson
+    implementation libs.okhttp.logging
+    
+    // Coroutines
+    implementation libs.kotlinx.coroutines.android
+    
+    // UI
     implementation libs.mpandroidchart
+    
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso.core
 }

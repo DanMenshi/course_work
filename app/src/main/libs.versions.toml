@@ -1,0 +1,9 @@
+toml
+# In gradle/libs.versions.toml
+[versions]
+# ...
+blurview = "2.0.3"
+
+[libraries]
+# ...
+blurview = { module = "com.eightbitlab:blurview", version.ref = "blurview" }

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:layout_margin="12dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="0dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/glass_card_bg"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/tvCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:text="USD"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvCode"
+            android:text="Доллар США"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:text="92.42"
+                android:textColor="@color/text_primary"
+                android:textSize="26sp" />
+
+            <TextView
+                android:id="@+id/tvTrend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+0.12%"
+                android:textColor="@color/green_up"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivFavorite"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:src="@android:drawable/btn_star_big_off"
+            app:tint="@color/text_secondary" />
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

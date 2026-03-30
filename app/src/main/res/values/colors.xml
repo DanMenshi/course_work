@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg_main">#000000</color>
-    <color name="bg_card">#141414</color>
-    <color name="text_main">#FFFFFF</color>
-    <color name="text_secondary">#757575</color>
-    <color name="accent_purple">#8E24AA</color>
-    <color name="accent_blue">#1E88E5</color>
+    <!-- Основной градиент фона -->
+    <color name="bg_start">#1A1A2E</color>
+    <color name="bg_center">#16213E</color>
+    <color name="bg_end">#0F3460</color>
+
+    <!-- Цвета стекла -->
+    <color name="glass_white_10">#1AFFFFFF</color>
+    <color name="glass_white_20">#33FFFFFF</color>
+    <color name="glass_stroke">#4DFFFFFF</color>
+
+    <!-- Акцентные цвета -->
+    <color name="accent_blue">#4ECCA3</color>
+    <color name="accent_pink">#E94560</color>
+
+    <!-- Текст -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+
+    <!-- Статус курсов -->
     <color name="green_up">#00C853</color>
     <color name="red_down">#FF1744</color>
-    <color name="gradient_start">#2962FF</color>
-    <color name="gradient_end">#AA00FF</color>
-    <color name="card_bg_lighter">#1E1E1E</color>
+
+    <!-- Градиент кнопки -->
+    <color name="gradient_start">#4ECCA3</color>
+    <color name="gradient_end">#45B29D</color>
+
+    <!-- Дополнительные цвета для совместимости -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- Legacy (для обратной совместимости во время рефакторинга) -->
+    <color name="bg_main">#121212</color>
+    <color name="bg_card">#1E1E1E</color>
+    <color name="text_main">#FFFFFF</color>
 </resources>
