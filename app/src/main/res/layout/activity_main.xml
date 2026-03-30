@@ -77,10 +77,14 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_centerVertical="true"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_popup_sync"
                 app:tint="@color/accent_blue" />
 
             <TextView
+                android:id="@+id/tvConverterLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -101,16 +105,31 @@
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/updateProgress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        app:indicatorColor="@color/accent_blue"
+        app:trackColor="@color/glass_white_20"
+        app:trackCornerRadius="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnOpenConverter"
+        android:progress="0"
+        android:max="100" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCurrencies"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:clipToPadding="false"
         android:paddingHorizontal="12dp"
         android:paddingBottom="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnOpenConverter"
+        app:layout_constraintTop_toBottomOf="@id/updateProgress"
         tools:listitem="@layout/item_currency_glass" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

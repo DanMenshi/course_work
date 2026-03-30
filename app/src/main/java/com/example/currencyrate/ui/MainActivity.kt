@@ -7,12 +7,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyrate.data.local.AppDatabase
 import com.example.currencyrate.data.remote.CbrApi
 import com.example.currencyrate.data.repository.CurrencyRepository
 import com.example.currencyrate.databinding.ActivityMainBinding
 import com.example.currencyrate.viewmodel.MainViewModel
+import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 
@@ -68,18 +70,15 @@ class MainActivity : AppCompatActivity() {
         }
         
         binding.btnSettings.setOnClickListener {
-            // Теперь все валюты на главном экране, но BottomSheet все еще полезен
-            // для быстрого поиска или управления списком
             AddCurrencyBottomSheet().show(supportFragmentManager, "AddCurrencyBottomSheet")
+        }
+
+        binding.ivConvIcon.setOnClickListener {
+            viewModel.refreshRates()
         }
     }
 
     private fun observeViewModel() {
-        /**
-         * Подписываемся на ВЕСЬ список валют.
-         * Благодаря сортировке в DAO (isFavorite DESC), избранные будут вверху.
-         * Адаптер сам выберет нужный ViewType (Glass или Compact).
-         */
         viewModel.allCurrencies.observe(this) { currencies ->
             (binding.rvCurrencies.adapter as CurrencyAdapter).submitList(currencies)
         }
@@ -96,6 +95,12 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.syncStatus.observe(this) { status ->
             binding.tvSubtitle.text = status
+        }
+
+        lifecycleScope.launch {
+            viewModel.updateProgress.collect { progress ->
+                binding.updateProgress.progress = progress
+            }
         }
     }
 }

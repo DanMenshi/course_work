@@ -43,16 +43,16 @@ class DetailsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {super.onCreate(savedInstanceState)
         binding = ActivityDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Если intent вернул null, используем 'USD'
         val code = intent.getStringExtra("CURRENCY_CODE") ?: "USD"
-        
+
         setupUI(code)
         observeViewModel()
-        
+
         viewModel.loadHistory(code, 7)
     }
 
