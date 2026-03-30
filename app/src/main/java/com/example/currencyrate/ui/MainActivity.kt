@@ -2,7 +2,6 @@ package com.example.currencyrate.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -59,7 +58,6 @@ class MainActivity : AppCompatActivity() {
         binding.rvCurrencies.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             this.adapter = adapter
-            // Начальное состояние для анимации появления
             alpha = 0f
         }
     }
@@ -70,22 +68,25 @@ class MainActivity : AppCompatActivity() {
         }
         
         binding.btnSettings.setOnClickListener {
+            // Теперь все валюты на главном экране, но BottomSheet все еще полезен
+            // для быстрого поиска или управления списком
             AddCurrencyBottomSheet().show(supportFragmentManager, "AddCurrencyBottomSheet")
         }
     }
 
     private fun observeViewModel() {
-        // Подписка на список валют
-        viewModel.favoriteCurrencies.observe(this) { currencies ->
+        /**
+         * Подписываемся на ВЕСЬ список валют.
+         * Благодаря сортировке в DAO (isFavorite DESC), избранные будут вверху.
+         * Адаптер сам выберет нужный ViewType (Glass или Compact).
+         */
+        viewModel.allCurrencies.observe(this) { currencies ->
             (binding.rvCurrencies.adapter as CurrencyAdapter).submitList(currencies)
         }
 
-        // Подписка на состояние загрузки
         viewModel.isLoading.observe(this) { isLoading ->
             binding.pbLoading.isVisible = isLoading
-            
             if (!isLoading) {
-                // Плавное появление списка при завершении загрузки
                 binding.rvCurrencies.animate()
                     .alpha(1f)
                     .setDuration(500)
@@ -93,7 +94,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Подписка на статус синхронизации
         viewModel.syncStatus.observe(this) { status ->
             binding.tvSubtitle.text = status
         }
