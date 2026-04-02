@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
             onItemClick = { currency ->
                 val intent = Intent(this, DetailsActivity::class.java).apply {
                     putExtra("CURRENCY_CODE", currency.code)
+                    putExtra("CURRENCY_NAME", currency.name)
+                    putExtra("CURRENCY_RATE", currency.rate)
                 }
                 startActivity(intent)
             }
@@ -68,8 +70,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnOpenConverter.setOnClickListener {
             startActivity(Intent(this, ConverterActivity::class.java))
         }
-        
-        binding.btnSettings.setOnClickListener {
+
+        // Меняем btnSettings на новую кнопку
+        binding.fabAddCurrency.setOnClickListener {
             AddCurrencyBottomSheet().show(supportFragmentManager, "AddCurrencyBottomSheet")
         }
 
@@ -79,7 +82,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.allCurrencies.observe(this) { currencies ->
+        // ИЗМЕНЕНИЕ ЗДЕСЬ: Меняем allCurrencies на favoriteCurrencies
+        viewModel.favoriteCurrencies.observe(this) { currencies ->
             (binding.rvCurrencies.adapter as CurrencyAdapter).submitList(currencies)
         }
 
@@ -99,7 +103,12 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             viewModel.updateProgress.collect { progress ->
-                binding.updateProgress.progress = progress
+                // Если сброс в 0, делаем без анимации, иначе с анимацией
+                if (progress == 0) {
+                    binding.updateProgress.setProgressCompat(0, false)
+                } else {
+                    binding.updateProgress.setProgressCompat(progress, true)
+                }
             }
         }
     }

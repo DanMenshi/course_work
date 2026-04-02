@@ -41,18 +41,7 @@
         app:layout_constraintStart_toEndOf="@id/tvSubtitle"
         app:layout_constraintTop_toTopOf="@id/tvSubtitle" />
 
-    <ImageView
-        android:id="@+id/btnSettings"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_marginEnd="24dp"
-        android:background="@drawable/glass_card_bg"
-        android:padding="10dp"
-        android:src="@android:drawable/ic_menu_add"
-        app:layout_constraintBottom_toBottomOf="@id/tvSubtitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvMainTitle"
-        app:tint="@color/text_primary" />
+
 
     <!-- Кнопка Конвертера (Glass) -->
     <androidx.cardview.widget.CardView
@@ -118,7 +107,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnOpenConverter"
         android:progress="0"
-        android:max="100" />
+        android:max="1000"
+        app:indicatorDirectionCircular="clockwise" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCurrencies"
@@ -131,5 +122,32 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/updateProgress"
         tools:listitem="@layout/item_currency_glass" />
+
+    <!-- Новая плавающая кнопка добавления валют -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/fabAddCurrency"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="32dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/gradient_button_bg">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerInParent="true"
+                android:src="@android:drawable/ic_menu_add"
+                app:tint="@color/white" />
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

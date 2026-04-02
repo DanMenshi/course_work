@@ -48,6 +48,20 @@ class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel
         calculate()
     }
 
+    fun setCurrencyByCode(code: String, type: String) {
+        val list = allCurrencies.value ?: return
+
+        // Ищем валюту, включая рубль, которого может не быть в основном списке ЦБ
+        val currency = list.find { it.code == code }
+            ?: if (code == "RUB") CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1) else return
+
+        if (type == "GIVE") {
+            updateGiveCurrency(currency)
+        } else {
+            updateReceiveCurrency(currency)
+        }
+    }
+
     fun onInputChanged(input: String) {
         currentInput = input.replace(",", ".").toDoubleOrNull() ?: 0.0
         calculate()

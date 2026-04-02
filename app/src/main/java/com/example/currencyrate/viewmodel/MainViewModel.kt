@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.currencyrate.data.repository.CurrencyRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,10 +18,7 @@ import java.util.TimeZone
 
 class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
 
-    // Подписка на все валюты из БД
     val allCurrencies = repository.allCurrencies.asLiveData()
-    
-    // Подписка только на избранные
     val favoriteCurrencies = repository.favoriteCurrencies.asLiveData()
 
     private val _isLoading = MutableLiveData<Boolean>()
@@ -32,20 +30,26 @@ class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
     private val _updateProgress = MutableStateFlow(0)
     val updateProgress: StateFlow<Int> = _updateProgress
 
+    private var timerJob: Job? = null
+
     init {
         refreshRates()
-        startAutoUpdateTimer()
     }
 
     private fun startAutoUpdateTimer() {
-        viewModelScope.launch {
-            while (true) {
-                for (i in 0..100) {
-                    _updateProgress.emit(i)
-                    delay(600) // 60 секунд / 100 шагов = 600 мс на 1%
-                }
-                refreshRates()
+        // Отменяем предыдущий таймер, если он был
+        timerJob?.cancel()
+
+        timerJob = viewModelScope.launch {
+            _updateProgress.value = 0 // Мгновенно сбрасываем в ноль
+
+            // Плавный таймер на 60 секунд (1000 шагов)
+            for (i in 0..1000) {
+                _updateProgress.value = i
+                delay(60) // 60 мс * 1000 = 60000 мс (1 минута)
             }
+            // По истечении таймера - обновляем
+            refreshRates()
         }
     }
 
@@ -53,20 +57,26 @@ class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             _syncStatus.value = "Загрузка данных..."
+
+            // Останавливаем таймер на время загрузки
+            timerJob?.cancel()
+            _updateProgress.value = 0
+
             try {
                 repository.refreshCurrencies()
-                
+
                 val sdf = SimpleDateFormat("HH:mm", Locale.getDefault()).apply {
                     timeZone = TimeZone.getTimeZone("GMT+3")
                 }
                 val currentTime = sdf.format(Date())
                 _syncStatus.value = "Обновлено в $currentTime (МСК)"
-                
-                _updateProgress.emit(0)
+
             } catch (e: Exception) {
                 _syncStatus.value = "Ошибка обновления"
             } finally {
                 _isLoading.value = false
+                // Запускаем таймер заново после завершения загрузки
+                startAutoUpdateTimer()
             }
         }
     }

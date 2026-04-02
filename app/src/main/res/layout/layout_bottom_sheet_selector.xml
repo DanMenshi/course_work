@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/main_gradient_bg"
+    android:background="@drawable/glass_card_bg"
+    android:backgroundTint="@color/bg_start"
     android:padding="20dp">
 
-    <!-- Ползунок сверху -->
     <View
         android:id="@+id/vHandle"
         android:layout_width="40dp"
@@ -22,37 +22,29 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:fontFamily="sans-serif-black"
-        android:text="Добавить валюту"
-        android:textColor="@color/white"
-        android:textSize="24sp"
+        android:text="Выберите валюту"
+        android:textColor="@color/text_primary"
+        android:textSize="22sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/vHandle" />
 
-    <!-- Поле поиска -->
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/glass_card_bg"
-        android:hint="Поиск по коду или названию..."
+        android:hint="Поиск (USD, Доллар...)"
         android:paddingHorizontal="16dp"
-        android:textColor="@color/white"
-        android:textColorHint="#80FFFFFF"
-        android:textSize="16sp"
-        android:inputType="text"
-        android:maxLines="1"
-        android:imeOptions="actionDone"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/glass_white_20"
         app:layout_constraintTop_toBottomOf="@id/tvSheetTitle" />
 
-    <!-- Список валют -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvAllCurrencies"
+        android:id="@+id/rvSelector"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        android:clipToPadding="false"
-        android:paddingBottom="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etSearch" />
 

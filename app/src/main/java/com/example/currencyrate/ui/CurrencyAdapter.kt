@@ -1,7 +1,9 @@
 package com.example.currencyrate.ui
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.view.animation.OvershootInterpolator
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -14,6 +16,7 @@ import com.example.currencyrate.databinding.ItemCurrencyGlassBinding
 import java.util.Locale
 
 class CurrencyAdapter(
+    private val isSelectionMode: Boolean = false, // Флаг: если true, прячем звездочки
     private val onFavoriteClick: (String, Boolean) -> Unit,
     private val onItemClick: (CurrencyEntity) -> Unit
 ) : ListAdapter<CurrencyEntity, CurrencyAdapter.BaseViewHolder>(DiffCallback()) {
@@ -24,6 +27,8 @@ class CurrencyAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
+        // В режиме выбора (конвертер) все элементы компактные
+        if (isSelectionMode) return TYPE_COMPACT
         return if (getItem(position).isFavorite) TYPE_GLASS else TYPE_COMPACT
     }
 
@@ -57,30 +62,57 @@ class CurrencyAdapter(
         ) {
             tvCode.text = item.code
             tvName.text = item.name
-            tvValue.text = String.format(Locale.getDefault(), "%.2f", item.rate)
+            tvValue.text = if (item.rate < 0.01) {
+                String.format(Locale.getDefault(), "%.4f", item.rate)
+            } else {
+                String.format(Locale.getDefault(), "%.2f", item.rate)
+            }
 
-            if (item.isFavorite) {
+            // Скрываем звезду, если это список для конвертера
+            if (isSelectionMode) {
+                ivFavorite.visibility = View.GONE
+            } else {
+                ivFavorite.visibility = View.VISIBLE
+                updateStarUI(item.isFavorite, ivFavorite)
+
+                ivFavorite.setOnClickListener {
+                    val newState = !item.isFavorite
+                    // Мгновенно обновляем цвет (для отзывчивости)
+                    updateStarUI(newState, ivFavorite)
+
+                    // Сложная анимация: уменьшение -> поворот -> пружинистое увеличение
+                    ivFavorite.animate()
+                        .scaleX(0.5f).scaleY(0.5f).rotationBy(-30f)
+                        .setDuration(150)
+                        .withEndAction {
+                            ivFavorite.animate()
+                                .scaleX(1.3f).scaleY(1.3f).rotationBy(60f)
+                                .setDuration(150)
+                                .withEndAction {
+                                    ivFavorite.animate()
+                                        .scaleX(1f).scaleY(1f).rotationBy(-30f)
+                                        .setDuration(300)
+                                        .setInterpolator(OvershootInterpolator(2f)) // Пружинный эффект
+                                        .start()
+                                }.start()
+                        }.start()
+
+                    onFavoriteClick(item.code, newState)
+                }
+            }
+
+            itemView.setOnClickListener {
+                onItemClick(item)
+            }
+        }
+
+        private fun updateStarUI(isFavorite: Boolean, ivFavorite: android.widget.ImageView) {
+            if (isFavorite) {
                 ivFavorite.setImageResource(android.R.drawable.btn_star_big_on)
                 ivFavorite.setColorFilter(ContextCompat.getColor(itemView.context, R.color.accent_blue))
             } else {
                 ivFavorite.setImageResource(android.R.drawable.btn_star_big_off)
                 ivFavorite.setColorFilter(ContextCompat.getColor(itemView.context, R.color.text_secondary))
-            }
-
-            ivFavorite.setOnClickListener {
-                ivFavorite.animate()
-                    .scaleX(1.2f)
-                    .scaleY(1.2f)
-                    .setDuration(100)
-                    .withEndAction {
-                        ivFavorite.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
-                        onFavoriteClick(item.code, !item.isFavorite)
-                    }
-                    .start()
-            }
-
-            itemView.setOnClickListener {
-                onItemClick(item)
             }
         }
     }
@@ -88,7 +120,7 @@ class CurrencyAdapter(
     inner class GlassViewHolder(private val binding: ItemCurrencyGlassBinding) : BaseViewHolder(binding) {
         override fun bind(item: CurrencyEntity) {
             setupCommonUI(item, binding.tvCode, binding.tvName, binding.tvValue, binding.ivFavorite)
-            binding.tvTrend.text = "+0.15%" // Заглушка
+            binding.tvTrend.text = "+0.15%"
         }
     }
 

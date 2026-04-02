@@ -55,21 +55,32 @@ class DetailsActivity : AppCompatActivity() {
             finish()
             return
         }
+        val name = intent.getStringExtra("CURRENCY_NAME") ?: ""
+        val rate = intent.getDoubleExtra("CURRENCY_RATE", 0.0)
 
-        setupUI(code)
+        setupUI(code, name, rate)
         observeViewModel()
 
         // Первичная загрузка
         viewModel.loadHistory(code, selectedDays)
     }
 
-    private fun setupUI(code: String) {
+    private fun setupUI(code: String, name: String, rate: Double) {
         binding.btnBack.setOnClickListener { finish() }
         binding.tvCode.text = code
-        
+        binding.tvName.text = name
+
+        // Умное форматирование
+        val formattedRate = if (rate < 0.01) {
+            String.format(Locale.getDefault(), "%.4f", rate)
+        } else {
+            String.format(Locale.getDefault(), "%.2f", rate)
+        }
+        binding.tvCurrentValue.text = "$formattedRate ₽"
+
         binding.tab7Days.setOnClickListener { updateTabs(7) }
         binding.tab30Days.setOnClickListener { updateTabs(30) }
-        
+
         setupChart(binding.chart)
     }
 
@@ -132,8 +143,8 @@ class DetailsActivity : AppCompatActivity() {
 
         viewModel.stats.observe(this) { stats ->
             if (stats != null) {
-                binding.tvMin.text = String.format(Locale.getDefault(), "%.2f", stats.first)
-                binding.tvMax.text = String.format(Locale.getDefault(), "%.2f", stats.second)
+                binding.tvMin.text = if (stats.first < 0.01) String.format(Locale.getDefault(), "%.4f", stats.first) else String.format(Locale.getDefault(), "%.2f", stats.first)
+                binding.tvMax.text = if (stats.second < 0.01) String.format(Locale.getDefault(), "%.4f", stats.second) else String.format(Locale.getDefault(), "%.2f", stats.second)
             }
         }
     }

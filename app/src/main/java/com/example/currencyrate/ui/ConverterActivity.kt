@@ -63,14 +63,21 @@ class ConverterActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Открытие выбора валют
+        // Открытие выбора валют (передаем строковый тип)
         binding.spinnerGive.setOnClickListener {
-            CurrencySelectorSheet.newInstance(CurrencySelectorSheet.SelectionType.GIVE)
-                .show(supportFragmentManager, "select_give")
+            CurrencySelectorSheet.newInstance("GIVE").show(supportFragmentManager, "select_give")
         }
         binding.spinnerReceive.setOnClickListener {
-            CurrencySelectorSheet.newInstance(CurrencySelectorSheet.SelectionType.RECEIVE)
-                .show(supportFragmentManager, "select_receive")
+            CurrencySelectorSheet.newInstance("RECEIVE").show(supportFragmentManager, "select_receive")
+        }
+
+        // Слушаем ответ от шторки выбора
+        supportFragmentManager.setFragmentResultListener(CurrencySelectorSheet.REQUEST_KEY, this) { _, bundle ->
+            val selectedCode = bundle.getString("selected_code")
+            val type = bundle.getString("type")
+            if (selectedCode != null && type != null) {
+                viewModel.setCurrencyByCode(selectedCode, type)
+            }
         }
     }
 
