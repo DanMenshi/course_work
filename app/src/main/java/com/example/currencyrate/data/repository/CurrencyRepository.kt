@@ -23,15 +23,16 @@ class CurrencyRepository(
     suspend fun refreshCurrencies() {
         withContext(Dispatchers.IO) {
             try {
-                Log.d("CurrencyRepository", "Fetching daily rates from CBR...")
                 val response = api.getDailyCurrencies()
-                
-                val currentList = try { 
-                    dao.getAllCurrencies().first() 
-                } catch (e: Exception) { 
-                    emptyList<CurrencyEntity>() 
+
+                // Получаем текущие данные из БД, чтобы запомнить старые курсы
+                val currentList = try {
+                    dao.getAllCurrencies().first()
+                } catch (e: Exception) {
+                    emptyList<CurrencyEntity>()
                 }
-                
+
+                val oldRatesMap = currentList.associateBy({ it.code }, { it.rate })
                 val favoritesMap = currentList.associateBy({ it.code }, { it.isFavorite })
                 val isFirstRun = currentList.isEmpty()
 
@@ -42,33 +43,38 @@ class CurrencyRepository(
                         favoritesMap[valute.code] ?: false
                     }
 
+                    val currentRate = valute.value.replace(",", ".").toDouble() / valute.nominal
+                    // Если курс уже был в БД, берем его как предыдущий, иначе он равен текущему
+                    val prevRate = oldRatesMap[valute.code] ?: currentRate
+
                     CurrencyEntity(
                         code = valute.code,
                         cbrId = valute.id,
                         name = valute.name,
-                        rate = valute.value.replace(",", ".").toDouble() / valute.nominal,
+                        rate = currentRate,
+                        previousRate = prevRate, // Сохраняем предыдущий курс
                         nominal = valute.nominal,
                         isFavorite = shouldBeFavorite
                     )
                 } ?: emptyList()
-                
+
                 val listToInsert = entities.toMutableList()
-                
+
                 if (listToInsert.none { it.code == "RUB" }) {
                     listToInsert.add(
                         CurrencyEntity(
-                            code = "RUB", 
+                            code = "RUB",
                             cbrId = "R00000",
-                            name = "Российский рубль", 
-                            rate = 1.0, 
-                            nominal = 1, 
+                            name = "Российский рубль",
+                            rate = 1.0,
+                            previousRate = 1.0,
+                            nominal = 1,
                             isFavorite = favoritesMap["RUB"] ?: false
                         )
                     )
                 }
-                
+
                 dao.insertAll(listToInsert)
-                Log.d("CurrencyRepository", "Successfully updated ${listToInsert.size} currencies. First run: $isFirstRun")
             } catch (e: Exception) {
                 Log.e("CurrencyRepository", "Failed to refresh currencies", e)
                 throw e
@@ -80,21 +86,27 @@ class CurrencyRepository(
         withContext(Dispatchers.IO) {
             try {
                 val valuteId = dao.getCbrIdByCode(code) ?: "R01235"
-                
-                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+                val sdfRequest = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val end = Calendar.getInstance()
                 val start = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -days) }
-                
-                val response = api.getHistoricalRates(sdf.format(start.time), sdf.format(end.time), valuteId)
-                
+
+                val response = api.getHistoricalRates(sdfRequest.format(start.time), sdfRequest.format(end.time), valuteId)
+
                 val history = response.records?.map {
+                    // Переводим дату ЦБ (dd.MM.yyyy) в формат ISO (yyyy-MM-dd) для правильной сортировки графиков
+                    val parts = it.date.split(".")
+                    val isoDate = if (parts.size == 3) "${parts[2]}-${parts[1]}-${parts[0]}" else it.date
+
                     HistoricalRateEntity(
                         code = code,
-                        date = it.date,
+                        date = isoDate,
                         rate = it.value.replace(",", ".").toDouble() / it.nominal
                     )
                 } ?: emptyList()
-                
+
+                // Очищаем старый график этой валюты и сохраняем только новый
+                dao.deleteHistoricalRates(code)
                 dao.insertHistoricalRates(history)
             } catch (e: Exception) {
                 e.printStackTrace()

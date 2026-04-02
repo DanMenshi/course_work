@@ -120,7 +120,18 @@ class CurrencyAdapter(
     inner class GlassViewHolder(private val binding: ItemCurrencyGlassBinding) : BaseViewHolder(binding) {
         override fun bind(item: CurrencyEntity) {
             setupCommonUI(item, binding.tvCode, binding.tvName, binding.tvValue, binding.ivFavorite)
-            binding.tvTrend.text = "+0.15%"
+
+            // Считаем реальный тренд (процент изменения)
+            val diff = item.rate - item.previousRate
+            val percent = if (item.previousRate != 0.0) (diff / item.previousRate) * 100 else 0.0
+
+            if (diff >= 0) {
+                binding.tvTrend.text = String.format(Locale.US, "+%.2f%%", percent)
+                binding.tvTrend.setTextColor(ContextCompat.getColor(itemView.context, R.color.green_up))
+            } else {
+                binding.tvTrend.text = String.format(Locale.US, "%.2f%%", percent)
+                binding.tvTrend.setTextColor(ContextCompat.getColor(itemView.context, R.color.red_down))
+            }
         }
     }
 

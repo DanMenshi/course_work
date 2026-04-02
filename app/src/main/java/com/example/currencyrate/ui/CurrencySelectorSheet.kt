@@ -80,7 +80,7 @@ class CurrencySelectorSheet : BottomSheetDialogFragment() {
         dao.getAllCurrencies().asLiveData().observe(viewLifecycleOwner) { list ->
             val mutableList = list.toMutableList()
             if (mutableList.none { it.code == "RUB" }) {
-                mutableList.add(0, CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1))
+                mutableList.add(0, CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1.0, 1))
             }
             allCurrencies = mutableList
             filterList(binding.etSearch.text.toString(), adapter)

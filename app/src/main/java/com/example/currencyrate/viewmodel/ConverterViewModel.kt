@@ -40,7 +40,7 @@ class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel
         if (_currencyGive.value != null && _currencyReceive.value != null) return
         
         val usd = currencies.find { it.code == "USD" }
-        val rub = currencies.find { it.code == "RUB" } ?: CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1)
+        val rub = currencies.find { it.code == "RUB" } ?: CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1.0, 1)
 
         if (_currencyGive.value == null) _currencyGive.value = usd ?: currencies.firstOrNull()
         if (_currencyReceive.value == null) _currencyReceive.value = rub
@@ -53,7 +53,7 @@ class ConverterViewModel(private val repository: CurrencyRepository) : ViewModel
 
         // Ищем валюту, включая рубль, которого может не быть в основном списке ЦБ
         val currency = list.find { it.code == code }
-            ?: if (code == "RUB") CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1) else return
+            ?: if (code == "RUB") CurrencyEntity("RUB", "R00000", "Российский рубль", 1.0, 1.0, 1) else return
 
         if (type == "GIVE") {
             updateGiveCurrency(currency)

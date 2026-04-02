@@ -28,4 +28,7 @@ interface CurrencyDao {
 
     @Query("SELECT cbrId FROM currencies WHERE code = :code LIMIT 1")
     suspend fun getCbrIdByCode(code: String): String?
+
+    @Query("DELETE FROM historical_rates WHERE code = :code")
+    suspend fun deleteHistoricalRates(code: String)
 }

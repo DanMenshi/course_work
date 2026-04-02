@@ -17,7 +17,7 @@ class CustomMarkerView(context: Context, layoutResource: Int, private val dates:
     override fun refreshContent(e: Entry, highlight: Highlight) {
         val index = e.x.toInt()
         if (index in dates.indices) {
-            // Превращаем "2024-05-12" в "12.05"
+            // Превращаем ISO дату "2024-05-12" в "12.05"
             val rawDate = dates[index]
             val formattedDate = try {
                 val parts = rawDate.split("-")
@@ -27,7 +27,14 @@ class CustomMarkerView(context: Context, layoutResource: Int, private val dates:
             }
             tvMarkerDate.text = formattedDate
         }
-        tvMarkerValue.text = String.format(Locale.US, "%.2f", e.y)
+
+        // Умное форматирование для маркера
+        tvMarkerValue.text = if (e.y < 0.01f) {
+            String.format(Locale.US, "%.4f", e.y)
+        } else {
+            String.format(Locale.US, "%.2f", e.y)
+        }
+
         super.refreshContent(e, highlight)
     }
 
