@@ -5,6 +5,6 @@ import androidx.room.Entity
 @Entity(tableName = "historical_rates", primaryKeys = ["code", "date"])
 data class HistoricalRateEntity(
     val code: String,
-    val date: String, // Формат: "yyyy-MM-dd"
+    val date: String,
     val rate: Double
 )

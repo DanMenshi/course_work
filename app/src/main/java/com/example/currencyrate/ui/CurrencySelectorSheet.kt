@@ -46,7 +46,6 @@ class CurrencySelectorSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. ТОЧНО ТАКОЙ ЖЕ ФИКС ВЫСОТЫ ДЛЯ КОНВЕРТЕРА
         dialog?.setOnShowListener {
             val bottomSheetDialog = it as BottomSheetDialog
             val bottomSheet = bottomSheetDialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)

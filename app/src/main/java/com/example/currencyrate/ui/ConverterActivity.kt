@@ -63,7 +63,6 @@ class ConverterActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Открытие выбора валют (передаем строковый тип)
         binding.spinnerGive.setOnClickListener {
             CurrencySelectorSheet.newInstance("GIVE").show(supportFragmentManager, "select_give")
         }

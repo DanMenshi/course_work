@@ -71,7 +71,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, ConverterActivity::class.java))
         }
 
-        // Меняем btnSettings на новую кнопку
         binding.fabAddCurrency.setOnClickListener {
             AddCurrencyBottomSheet().show(supportFragmentManager, "AddCurrencyBottomSheet")
         }
@@ -82,7 +81,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        // ИЗМЕНЕНИЕ ЗДЕСЬ: Меняем allCurrencies на favoriteCurrencies
         viewModel.favoriteCurrencies.observe(this) { currencies ->
             (binding.rvCurrencies.adapter as CurrencyAdapter).submitList(currencies)
         }
@@ -103,7 +101,6 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             viewModel.updateProgress.collect { progress ->
-                // Если сброс в 0, делаем без анимации, иначе с анимацией
                 if (progress == 0) {
                     binding.updateProgress.setProgressCompat(0, false)
                 } else {

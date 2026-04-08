@@ -37,18 +37,15 @@ class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
     }
 
     private fun startAutoUpdateTimer() {
-        // Отменяем предыдущий таймер, если он был
         timerJob?.cancel()
 
         timerJob = viewModelScope.launch {
-            _updateProgress.value = 0 // Мгновенно сбрасываем в ноль
+            _updateProgress.value = 0
 
-            // Плавный таймер на 60 секунд (1000 шагов)
             for (i in 0..1000) {
                 _updateProgress.value = i
-                delay(60) // 60 мс * 1000 = 60000 мс (1 минута)
+                delay(60)
             }
-            // По истечении таймера - обновляем
             refreshRates()
         }
     }
@@ -58,7 +55,6 @@ class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
             _isLoading.value = true
             _syncStatus.value = "Загрузка данных..."
 
-            // Останавливаем таймер на время загрузки
             timerJob?.cancel()
             _updateProgress.value = 0
 
@@ -75,7 +71,6 @@ class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
                 _syncStatus.value = "Ошибка обновления"
             } finally {
                 _isLoading.value = false
-                // Запускаем таймер заново после завершения загрузки
                 startAutoUpdateTimer()
             }
         }

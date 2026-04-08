@@ -61,7 +61,6 @@ class DetailsActivity : AppCompatActivity() {
         setupUI(code, name, rate)
         observeViewModel()
 
-        // Первичная загрузка
         viewModel.loadHistory(code, selectedDays)
     }
 
@@ -70,7 +69,6 @@ class DetailsActivity : AppCompatActivity() {
         binding.tvCode.text = code
         binding.tvName.text = name
 
-        // Умное форматирование
         val formattedRate = if (rate < 0.01) {
             String.format(Locale.getDefault(), "%.4f", rate)
         } else {
@@ -88,7 +86,7 @@ class DetailsActivity : AppCompatActivity() {
         if (days == selectedDays) return
         selectedDays = days
 
-        binding.chart.clear() // Очищаем график перед загрузкой новых данных
+        binding.chart.clear()
         
         val code = binding.tvCode.text.toString()
         viewModel.loadHistory(code, days)
@@ -121,7 +119,7 @@ class DetailsActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.history.observe(this) { history ->
-            binding.chart.clear() // Гарантированная очистка при получении данных
+            binding.chart.clear()
             
             if (history == null || history.isEmpty()) {
                 currentHistoryDates = emptyList()

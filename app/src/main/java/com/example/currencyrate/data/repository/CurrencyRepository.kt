@@ -25,7 +25,6 @@ class CurrencyRepository(
             try {
                 val response = api.getDailyCurrencies()
 
-                // Получаем текущие данные из БД, чтобы запомнить старые курсы
                 val currentList = try {
                     dao.getAllCurrencies().first()
                 } catch (e: Exception) {
@@ -44,7 +43,6 @@ class CurrencyRepository(
                     }
 
                     val currentRate = valute.value.replace(",", ".").toDouble() / valute.nominal
-                    // Если курс уже был в БД, берем его как предыдущий, иначе он равен текущему
                     val prevRate = oldRatesMap[valute.code] ?: currentRate
 
                     CurrencyEntity(
@@ -52,7 +50,7 @@ class CurrencyRepository(
                         cbrId = valute.id,
                         name = valute.name,
                         rate = currentRate,
-                        previousRate = prevRate, // Сохраняем предыдущий курс
+                        previousRate = prevRate,
                         nominal = valute.nominal,
                         isFavorite = shouldBeFavorite
                     )
@@ -94,7 +92,6 @@ class CurrencyRepository(
                 val response = api.getHistoricalRates(sdfRequest.format(start.time), sdfRequest.format(end.time), valuteId)
 
                 val history = response.records?.map {
-                    // Переводим дату ЦБ (dd.MM.yyyy) в формат ISO (yyyy-MM-dd) для правильной сортировки графиков
                     val parts = it.date.split(".")
                     val isoDate = if (parts.size == 3) "${parts[2]}-${parts[1]}-${parts[0]}" else it.date
 
@@ -105,7 +102,6 @@ class CurrencyRepository(
                     )
                 } ?: emptyList()
 
-                // Очищаем старый график этой валюты и сохраняем только новый
                 dao.deleteHistoricalRates(code)
                 dao.insertHistoricalRates(history)
             } catch (e: Exception) {

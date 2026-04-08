@@ -63,7 +63,6 @@ class AddCurrencyBottomSheet : BottomSheetDialogFragment() {
             this.adapter = adapter
         }
 
-        // 2. НАДЕЖНО ПОЛУЧАЕМ ДАННЫЕ (LiveData не ломается в шторках)
         dao.getAllCurrencies().asLiveData().observe(viewLifecycleOwner) { currencies ->
             allCurrencies = currencies
             filterList(binding.etSearch.text.toString(), adapter)

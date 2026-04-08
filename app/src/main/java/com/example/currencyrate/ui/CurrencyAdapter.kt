@@ -16,7 +16,7 @@ import com.example.currencyrate.databinding.ItemCurrencyGlassBinding
 import java.util.Locale
 
 class CurrencyAdapter(
-    private val isSelectionMode: Boolean = false, // Флаг: если true, прячем звездочки
+    private val isSelectionMode: Boolean = false,
     private val onFavoriteClick: (String, Boolean) -> Unit,
     private val onItemClick: (CurrencyEntity) -> Unit
 ) : ListAdapter<CurrencyEntity, CurrencyAdapter.BaseViewHolder>(DiffCallback()) {
@@ -27,7 +27,6 @@ class CurrencyAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        // В режиме выбора (конвертер) все элементы компактные
         if (isSelectionMode) return TYPE_COMPACT
         return if (getItem(position).isFavorite) TYPE_GLASS else TYPE_COMPACT
     }
@@ -68,7 +67,6 @@ class CurrencyAdapter(
                 String.format(Locale.getDefault(), "%.2f", item.rate)
             }
 
-            // Скрываем звезду, если это список для конвертера
             if (isSelectionMode) {
                 ivFavorite.visibility = View.GONE
             } else {
@@ -77,10 +75,9 @@ class CurrencyAdapter(
 
                 ivFavorite.setOnClickListener {
                     val newState = !item.isFavorite
-                    // Мгновенно обновляем цвет (для отзывчивости)
+
                     updateStarUI(newState, ivFavorite)
 
-                    // Сложная анимация: уменьшение -> поворот -> пружинистое увеличение
                     ivFavorite.animate()
                         .scaleX(0.5f).scaleY(0.5f).rotationBy(-30f)
                         .setDuration(150)
@@ -92,7 +89,7 @@ class CurrencyAdapter(
                                     ivFavorite.animate()
                                         .scaleX(1f).scaleY(1f).rotationBy(-30f)
                                         .setDuration(300)
-                                        .setInterpolator(OvershootInterpolator(2f)) // Пружинный эффект
+                                        .setInterpolator(OvershootInterpolator(2f))
                                         .start()
                                 }.start()
                         }.start()
@@ -121,7 +118,7 @@ class CurrencyAdapter(
         override fun bind(item: CurrencyEntity) {
             setupCommonUI(item, binding.tvCode, binding.tvName, binding.tvValue, binding.ivFavorite)
 
-            // Считаем реальный тренд (процент изменения)
+
             val diff = item.rate - item.previousRate
             val percent = if (item.previousRate != 0.0) (diff / item.previousRate) * 100 else 0.0
 
